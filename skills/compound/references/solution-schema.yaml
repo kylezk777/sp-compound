@@ -1,0 +1,71 @@
+# Solution Document Schema
+# All docs/solutions/ documents MUST have YAML frontmatter with these fields.
+
+required:
+  title:
+    type: string
+    description: "Concise description of the problem/solution (< 100 chars)"
+  category:
+    type: string
+    enum:
+      - build-errors
+      - test-failures
+      - runtime-errors
+      - performance-issues
+      - database-issues
+      - security-issues
+      - ui-bugs
+      - integration-issues
+      - logic-errors
+    description: "Auto-detected from problem type. Maps to directory."
+  track:
+    type: string
+    enum: [bug, knowledge]
+    description: "Bug track for solved problems. Knowledge track for general guidance."
+  date_created:
+    type: string
+    format: "YYYY-MM-DD"
+  status:
+    type: string
+    enum: [current, stale]
+    default: current
+
+optional:
+  module:
+    type: string
+    description: "Primary module/package this learning relates to"
+  component:
+    type: string
+    description: "Specific component within the module"
+  tags:
+    type: array
+    items: string
+    description: "Searchable tags for discovery"
+  resolution_type:
+    type: string
+    enum:
+      - code_fix
+      - config_change
+      - dependency_update
+      - architecture_change
+      - workaround
+      - documentation
+    description: "How the problem was resolved (bug track only)"
+  related_files:
+    type: array
+    items: string
+    description: "File paths referenced in this learning"
+  stale_reason:
+    type: string
+    description: "Why this doc was marked stale (set by compound-refresh)"
+  stale_date:
+    type: string
+    format: "YYYY-MM-DD"
+    description: "When this doc was marked stale"
+  last_refreshed:
+    type: string
+    format: "YYYY-MM-DD"
+    description: "Last time compound-refresh verified this doc"
+  superseded_by:
+    type: string
+    description: "Path to replacement document (set during Replace operation)"
