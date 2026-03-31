@@ -27,7 +27,7 @@ Scan for affected files and existing tests, then assess complexity:
 - **Small/Medium** (clear scope, under ~10 files): build task list, proceed
 - **Large** (cross-cutting, 10+ files): recommend `sp-compound:brainstorm` or `sp-compound:plan` first, but honor user's choice to proceed
 
-## Phase 1: Quick Start
+## Phase 1: Setup & Strategy
 
 ### Step 1: Read Plan and Clarify (skip for bare prompts)
 Read the plan fully. It's a decision artifact, not an execution script. Check:
@@ -60,7 +60,7 @@ Break plan into actionable tasks from implementation units. Include dependency o
 
 **Default for 3+ tasks with dependencies: Serial subagent** — this is SP's proven path.
 
-## Phase 2: Execute (Serial Subagent — Primary Path)
+## Phase 2: Execute — Serial Subagent (Primary Path)
 
 For each task in priority order:
 
@@ -108,7 +108,7 @@ Provide: what was implemented, plan reference, BASE_SHA, HEAD_SHA.
 
 Mark task complete in task list. Move to next task.
 
-## Phase 2 (Alternate): Direct Inline Execution
+## Phase 2 (Alternate): Direct Inline
 
 For trivial/small work without subagents:
 
@@ -135,7 +135,7 @@ Before changing any file:
 - Conventional commit messages (feat:, fix:, refactor:, test:)
 - Stage only relevant files (not `git add .`)
 
-## Phase 3: Quality Check
+## Phase 4: Quality Check
 
 After all tasks complete:
 
@@ -144,7 +144,7 @@ After all tasks complete:
 3. **Address review findings** — fix critical/important issues
 4. **Run `sp-compound:verification`** — evidence before claiming done
 
-## Phase 4: Ship
+## Phase 5: Ship
 
 After review passes:
 

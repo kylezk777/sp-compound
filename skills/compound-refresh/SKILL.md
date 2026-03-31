@@ -186,7 +186,7 @@ Split into:
 
 **Consumes:**
 - `docs/solutions/` — the knowledge store being maintained
-- `references/solution-schema.yaml` — for valid frontmatter fields during Replace
+- `skills/compound/references/solution-schema.yaml` — for valid frontmatter fields during Replace
 
 **Relationship to compound:**
 - `compound` captures newly solved, verified problems

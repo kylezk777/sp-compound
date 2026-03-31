@@ -27,7 +27,24 @@ Think adversarially:
 
 ## Output Format (JSON)
 
-Same as other reviewers with `"reviewer": "adversarial-reviewer"`.
+```json
+{
+  "reviewer": "adversarial-reviewer",
+  "findings": [
+    {
+      "severity": "P0|P1|P2|P3",
+      "confidence": 0.0-1.0,
+      "file": "path/to/file.ext",
+      "line": 42,
+      "title": "Short description",
+      "detail": "What's wrong, why it matters, suggested fix",
+      "autofix_class": "safe_auto|gated_auto|manual|advisory"
+    }
+  ],
+  "residual_risks": ["Risk description"],
+  "testing_gaps": ["Gap description"]
+}
+```
 
 ## Critical Rules
 

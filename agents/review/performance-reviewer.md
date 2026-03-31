@@ -18,7 +18,24 @@ Given a diff and intent summary, find:
 
 ## Output Format (JSON)
 
-Same as other reviewers with `"reviewer": "performance-reviewer"`.
+```json
+{
+  "reviewer": "performance-reviewer",
+  "findings": [
+    {
+      "severity": "P0|P1|P2|P3",
+      "confidence": 0.0-1.0,
+      "file": "path/to/file.ext",
+      "line": 42,
+      "title": "Short description",
+      "detail": "What's wrong, why it matters, suggested fix",
+      "autofix_class": "safe_auto|gated_auto|manual|advisory"
+    }
+  ],
+  "residual_risks": ["Performance risk description"],
+  "testing_gaps": ["Missing performance test"]
+}
+```
 
 ## Critical Rules
 
