@@ -84,7 +84,7 @@ Use `./implementer-prompt.md` template. Provide:
 | **DONE** | Proceed to spec review |
 | **DONE_WITH_CONCERNS** | Read concerns. If correctness/scope: address before review. If observations: note and proceed. |
 | **NEEDS_CONTEXT** | Provide missing context, re-dispatch same model |
-| **BLOCKED** | Assess: context problem → provide + re-dispatch. Too hard → re-dispatch with more capable model. Too large → break into smaller pieces. Plan wrong → escalate to human. |
+| **BLOCKED** | Assess: context problem → provide + re-dispatch. Test failure → invoke `sp-compound:debug` before re-dispatch. Too hard → re-dispatch with more capable model. Too large → break into smaller pieces. Plan wrong → escalate to human. |
 
 **Never** ignore an escalation or force retry without changes.
 
@@ -135,7 +135,7 @@ Before changing any file:
 - Conventional commit messages (feat:, fix:, refactor:, test:)
 - Stage only relevant files (not `git add .`)
 
-## Phase 4: Quality Check
+## Phase 3: Quality Check
 
 After all tasks complete:
 
@@ -144,7 +144,7 @@ After all tasks complete:
 3. **Address review findings** — fix critical/important issues
 4. **Run `sp-compound:verification`** — evidence before claiming done
 
-## Phase 5: Ship
+## Phase 4: Ship
 
 After review passes:
 
@@ -184,6 +184,6 @@ After review passes:
 **Invokes:**
 - **sp-compound:flexible-tdd** — per implementation unit's execution note
 - **sp-compound:review** — after all tasks complete (Phase 3)
-- **sp-compound:verification** — before claiming completion
+- **sp-compound:verification** — before claiming completion (Phase 3)
 - **sp-compound:finishing-branch** — after review passes (Phase 4)
 - **sp-compound:git-worktree** — when user selects worktree strategy

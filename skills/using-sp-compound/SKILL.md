@@ -50,6 +50,8 @@ Use the `Skill` tool. When you invoke a skill, its content is loaded and present
 
 | Trigger | Skill | Purpose |
 |---------|-------|---------|
+| Bug, test failure, unexpected behavior | `sp-compound:debug` | Systematic root-cause investigation before fixing |
+| Received review feedback to address | `sp-compound:receiving-review` | Technical evaluation of review feedback before implementing |
 | Implementing any feature/bugfix | `sp-compound:flexible-tdd` | TDD with strategy: test-first / characterization-first / pragmatic |
 | About to claim work is done | `sp-compound:verification` | Evidence before claims — run verification, then report |
 | Need isolated workspace | `sp-compound:git-worktree` | Create git worktree for parallel development |
@@ -72,7 +74,7 @@ When multiple skills could apply:
 2. **Implementation skills second** (work, flexible-tdd) — guide execution
 
 "Let's build X" -> brainstorm first, then plan, then work.
-"Fix this bug" -> flexible-tdd (characterization-first for legacy, test-first for known bugs).
+"Fix this bug" -> debug first (find root cause), then flexible-tdd (test-first for the fix).
 
 ## Skill Types
 

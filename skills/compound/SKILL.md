@@ -93,21 +93,7 @@ If the new learning CONTRADICTS or SUPERSEDES content in an existing document (d
 
 ## Phase 3: Discoverability Check
 
-Check whether project instruction files (AGENTS.md, CLAUDE.md) would lead agents to discover `docs/solutions/`.
-
-### Assessment
-An agent reading instruction files should learn:
-1. That a searchable knowledge store exists
-2. Enough about its structure to search effectively
-3. When to search it (during planning and review)
-
-This is a **semantic assessment**, not a string match.
-
-### If Not Discoverable
-1. Identify natural placement in the instruction file
-2. Draft smallest addition matching file's style and tone
-3. **Require user consent** before editing any instruction file
-4. Keep tone informational, not imperative
+Read and follow `references/discoverability-check.md`. Verify that project instruction files would lead agents to discover `docs/solutions/`.
 
 ## Output
 
@@ -145,3 +131,4 @@ Next steps:
 - `references/solution-schema.yaml` — frontmatter field definitions
 - `references/yaml-schema.md` — category-to-directory mapping
 - `references/resolution-template.md` — document section templates
+- `references/discoverability-check.md` — instruction file verification

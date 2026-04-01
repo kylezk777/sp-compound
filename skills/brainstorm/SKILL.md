@@ -23,13 +23,14 @@ You MUST create a task for each of these items and complete them in order:
 
 1. **Resume check** — search for existing brainstorm work
 2. **Context scan** — check project files, docs, recent commits, knowledge store
-3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
-4. **Propose 2-3 approaches** — with trade-offs and your recommendation
-5. **Present requirements** — grouped by theme, get user approval
-6. **Write requirements doc** — save to `docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md`
-7. **Requirements self-review** — check for placeholders, contradictions, ambiguity, scope
-8. **User reviews written requirements** — ask user to review before proceeding
-9. **Transition to planning** — invoke sp-compound:plan skill
+3. **Offer Visual Companion** — if topic involves visual questions (its own message, not combined)
+4. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
+5. **Propose 2-3 approaches** — with trade-offs and your recommendation
+6. **Present requirements** — grouped by theme, get user approval
+7. **Write requirements doc** — save to `docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md`
+8. **Requirements self-review** — check for placeholders, contradictions, ambiguity, scope
+9. **User reviews written requirements** — ask user to review before proceeding
+10. **Transition to planning** — invoke sp-compound:plan skill
 
 ## Phase 0: Resume Detection
 
@@ -79,6 +80,22 @@ Grep docs/solutions/**/*.md for module/component/tags matching the topic
   - "This area has N historical learnings including X-type and Y-type issues"
   - This affects scope assessment and risk evaluation
 - If `docs/solutions/` doesn't exist, note it and move on
+
+## Phase 1.5: Visual Companion
+
+If upcoming questions will involve visual content (mockups, layouts, diagrams, architecture), offer the companion once for consent:
+
+> "Some of what we're working on might be easier to explain if I can show it to you in a web browser. I can put together mockups, diagrams, comparisons, and other visuals as we go. Want to try it? (Requires opening a local URL)"
+
+**This offer MUST be its own message.** Do not combine it with clarifying questions or any other content. Wait for the user's response.
+
+If they decline, proceed with text-only brainstorming. If the topic has no visual component, skip this phase entirely.
+
+**Per-question decision (after acceptance):** Even after the user accepts, decide FOR EACH QUESTION whether to use the browser or terminal:
+- **Use browser** for: mockups, wireframes, layout comparisons, architecture diagrams, side-by-side visual designs
+- **Use terminal** for: requirements questions, conceptual choices, tradeoff lists, scope decisions
+
+A question about a UI topic is not automatically a visual question. "What does personality mean in this context?" → terminal. "Which wizard layout works better?" → browser.
 
 ## Phase 2: Interactive Q&A
 

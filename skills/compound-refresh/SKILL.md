@@ -13,9 +13,16 @@ Maintain `docs/solutions/` quality by reviewing existing learnings against the c
 
 ## Mode Detection
 
-Check `$ARGUMENTS` for `mode:autofix`:
+Check `$ARGUMENTS` for `mode:autofix` or `mode:autonomous`:
 - **Interactive** (default): user present, ask decisions on ambiguous cases
 - **Autofix**: no user interaction, apply unambiguous actions, mark ambiguous as stale
+- **Autonomous**: unattended execution (e.g., scheduled via cron). More conservative than autofix:
+  - Only execute Keep and Update operations
+  - Mark everything else (Consolidate, Replace, Delete) as stale with recommendation
+  - Higher confidence threshold: only act when evidence is unambiguous
+  - Machine-parseable report format (structured markdown with consistent headings)
+  - Never create new files (no Replace successors)
+  - If any doc cannot be assessed → mark stale, do not guess
 
 ### Autofix Mode Rules
 1. Skip all user questions — never pause for input
@@ -24,6 +31,20 @@ Check `$ARGUMENTS` for `mode:autofix`:
 4. Mark as stale when uncertain (add `status: stale`, `stale_reason`, `stale_date` in frontmatter)
 5. Conservative confidence — borderline cases get marked stale
 6. Generate report with **Applied** and **Recommended** sections
+
+### Autonomous Mode Rules
+1. All Autofix rules apply, PLUS:
+2. **No destructive operations** — never Delete, never Replace (write successor)
+3. **No creative operations** — never Consolidate (requires judgment on canonical doc)
+4. **Update only when confident** — if any ambiguity in reference drift, mark stale instead
+5. **Report format** — each document gets a structured block:
+   ```
+   ### <filepath>
+   - **Status:** kept | updated | marked-stale
+   - **Evidence:** <one-line summary>
+   - **Action:** <what was done or recommended>
+   ```
+6. Exit code convention: 0 = all processed, 1 = some marked stale (needs human follow-up)
 
 ## 5 Maintenance Operations
 
@@ -131,6 +152,7 @@ In-place edits only. Valid: renamed references, updated module names, fixed link
 Invalid "updates" (rewriting solution section) → should be Replace instead.
 
 ### Consolidate Flow
+**Autonomous mode:** Skip. Mark both docs as stale with `stale_reason: consolidation-candidate`. Report recommendation.
 1. Confirm canonical doc
 2. Extract unique content from subsumed doc(s)
 3. Merge naturally into canonical
@@ -138,10 +160,12 @@ Invalid "updates" (rewriting solution section) → should be Replace instead.
 5. Delete subsumed doc
 
 ### Replace Flow
+**Autonomous mode:** Always take insufficient-evidence path (mark stale). Never write replacement.
 **Sufficient evidence:** Write new learning at same category path, delete old file, set `superseded_by` if applicable.
 **Insufficient evidence:** Mark old doc as stale: add `status: stale`, `stale_reason`, `stale_date` to frontmatter. Report recommendation for manual resolution or future `sp-compound:compound` capture.
 
 ### Delete Flow
+**Autonomous mode:** Skip. Mark as stale with `stale_reason: deletion-candidate`. Report recommendation.
 Delete only when clearly obsolete, redundant with no unique content, or problem domain is gone.
 **Do not delete just because it's old.** Git history preserves the content.
 
@@ -161,7 +185,7 @@ Stage only compound-refresh files. Conventional commit message summarizing what 
 
 ## Discoverability Check
 
-Runs every time after the refresh report. Same check as `sp-compound:compound` Phase 3 — verify instruction files reference `docs/solutions/`.
+Runs every time after the refresh report. Read and follow `skills/compound/references/discoverability-check.md`.
 
 ## Output Report
 

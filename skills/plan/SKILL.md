@@ -107,7 +107,22 @@ Merge agent outputs into a research summary:
 [Hard constraints discovered: API limits, framework restrictions, etc.]
 ```
 
-### 1.3 How Learnings Influence the Plan
+### 1.3 Flow Analysis (conditional — Deep plans with stateful behavior)
+
+After consolidating research, dispatch if the feature involves state machines, multi-step workflows, or event-driven flows:
+
+```
+Dispatch sp-compound:spec-flow-analyzer agent with:
+- Feature description
+- Consolidated research from Phase 1.2 (codebase patterns, existing state handling)
+- Target states/transitions if identifiable from requirements
+```
+
+Skip for Lightweight/Standard plans unless the feature is clearly stateful.
+
+Flow analysis output feeds into: test scenarios (edge cases), risk section (error paths), and implementation approach (state handling patterns).
+
+### 1.4 How Learnings Influence the Plan
 
 When learnings-researcher returns relevant findings:
 
@@ -274,3 +289,4 @@ Which approach?
 - **repo-research-analyst** — always during Phase 1
 - **learnings-researcher** — always during Phase 1
 - **best-practices-researcher** — conditionally during Phase 1 (high-risk only)
+- **spec-flow-analyzer** — conditionally after Phase 1.2 (Deep plans with stateful behavior)

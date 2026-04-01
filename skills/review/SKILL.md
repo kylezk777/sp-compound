@@ -81,6 +81,7 @@ Read and follow `references/merge-pipeline.md`:
 1. **Validate** — drop malformed findings
 2. **Confidence gate** — suppress < 0.60 (P0 at 0.50+ survives)
 3. **Deduplicate** — fingerprint by file + line bucket +/-3 + title
+3.5. **Pre-existing detection** — git blame to separate pre-existing from new findings
 4. **Cross-reviewer boost** — 2+ reviewers on same issue → +0.10 confidence
 5. **Route** — classify safe_auto / gated_auto / manual / advisory
 6. **Sort** — severity → confidence → file → line
@@ -106,13 +107,16 @@ What was auto-fixed.
 ### Residual Work
 Unresolved gated_auto/manual findings.
 
+### Pre-Existing Issues
+Findings where `pre_existing: true` — code that existed before this PR. Listed for visibility but excluded from verdict and auto-fix.
+
 ### Learnings & Past Solutions
 From learnings-researcher — related historical issues.
 
 ### Verdict
-- **"Ready to merge"** — no P0/P1, all findings addressed
-- **"Ready with fixes"** — safe_auto fixes applied, remaining are P2/P3
-- **"Not ready"** — P0/P1 remain unfixed
+- **"Ready to merge"** — no new P0/P1, all findings addressed (pre-existing P0/P1 don't block)
+- **"Ready with fixes"** — safe_auto fixes applied, remaining are P2/P3 (pre-existing excluded)
+- **"Not ready"** — new P0/P1 remain unfixed
 
 ## Post-Review: Auto-Fix
 

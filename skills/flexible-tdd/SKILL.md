@@ -119,6 +119,7 @@ Before marking work complete:
 | Test too complicated | Design too complicated. Simplify interface. |
 | Must mock everything | Code too coupled. Use dependency injection. |
 | Test setup huge | Extract helpers. Still complex? Simplify design. |
+| Test fails for unexpected reason | Invoke `sp-compound:debug` — find root cause before fixing. |
 
 ## Integration
 

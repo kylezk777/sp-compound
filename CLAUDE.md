@@ -23,6 +23,8 @@ Each stage consumes and/or produces knowledge in `docs/solutions/`, creating a c
 
 | Situation | Skill |
 |-----------|-------|
+| Bug, test failure, unexpected behavior | `sp-compound:debug` |
+| Received review feedback to address | `sp-compound:receiving-review` |
 | Implementing feature/bugfix (TDD strategy) | `sp-compound:flexible-tdd` |
 | About to claim work is complete | `sp-compound:verification` |
 | Need isolated workspace | `sp-compound:git-worktree` |
