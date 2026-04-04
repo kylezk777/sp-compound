@@ -66,7 +66,7 @@ SP and CE each solve half the problem well:
 Register the marketplace, then install:
 
 ```bash
-/plugin marketplace add kyle/sp-compound
+/plugin marketplace add kylezk777/sp-compound
 /plugin install sp-compound
 ```
 
