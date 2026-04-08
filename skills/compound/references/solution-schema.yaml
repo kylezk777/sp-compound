@@ -1,13 +1,19 @@
 # Solution Document Schema
 # All docs/solutions/ documents MUST have YAML frontmatter with these fields.
+#
+# The schema has two tracks:
+#   Bug track      — solved problems (errors, failures, performance issues)
+#   Knowledge track — guidance, best practices, workflow improvements
+#
+# Track determines which sections and optional fields apply.
 
-required:
-  title:
-    type: string
-    description: "Concise description of the problem/solution (< 100 chars)"
-  category:
-    type: string
-    enum:
+# --- Track classification ---------------------------------------------------
+# The `track` field is explicit. Use the category mapping below to determine
+# which track applies based on the category directory.
+tracks:
+  bug:
+    description: "Defects, failures, and errors that were diagnosed and fixed"
+    categories:
       - build-errors
       - test-failures
       - runtime-errors
@@ -17,11 +23,45 @@ required:
       - ui-bugs
       - integration-issues
       - logic-errors
-    description: "Auto-detected from problem type. Maps to directory."
+  knowledge:
+    description: "Best practices, workflow improvements, patterns, and documentation"
+    categories:
+      - best-practices
+      - workflow-issues
+      - developer-experience
+      - documentation-gaps
+      - patterns
+
+# --- Required fields (both tracks) -----------------------------------------
+required:
+  title:
+    type: string
+    description: "Concise description of the problem/solution (< 100 chars)"
+  category:
+    type: string
+    enum:
+      # Bug track categories
+      - build-errors
+      - test-failures
+      - runtime-errors
+      - performance-issues
+      - database-issues
+      - security-issues
+      - ui-bugs
+      - integration-issues
+      - logic-errors
+      # Knowledge track categories
+      - best-practices
+      - workflow-issues
+      - developer-experience
+      - documentation-gaps
+      # Derived documents
+      - patterns
+    description: "Auto-detected from problem context. Maps to docs/solutions/<category>/ directory."
   track:
     type: string
     enum: [bug, knowledge]
-    description: "Bug track for solved problems. Knowledge track for general guidance."
+    description: "Bug track for solved problems. Knowledge track for general guidance. Determined by category — see tracks section."
   date_created:
     type: string
     format: "YYYY-MM-DD"
@@ -30,6 +70,7 @@ required:
     enum: [current, stale]
     default: current
 
+# --- Optional fields (both tracks) -----------------------------------------
 optional:
   module:
     type: string
@@ -40,17 +81,11 @@ optional:
   tags:
     type: array
     items: string
-    description: "Searchable tags for discovery"
-  resolution_type:
+    description: "Searchable tags for discovery (lowercase, hyphen-separated)"
+  severity:
     type: string
-    enum:
-      - code_fix
-      - config_change
-      - dependency_update
-      - architecture_change
-      - workaround
-      - documentation
-    description: "How the problem was resolved (bug track only)"
+    enum: [critical, high, medium, low]
+    description: "Impact severity of the problem"
   related_files:
     type: array
     items: string
@@ -69,3 +104,49 @@ optional:
   superseded_by:
     type: string
     description: "Path to replacement document (set during Replace operation)"
+  last_updated:
+    type: string
+    format: "YYYY-MM-DD"
+    description: "Last time this doc was updated with new information"
+
+# --- Bug track optional fields ----------------------------------------------
+bug_optional:
+  resolution_type:
+    type: string
+    enum:
+      - code_fix
+      - config_change
+      - dependency_update
+      - architecture_change
+      - workaround
+      - documentation
+    description: "How the problem was resolved"
+  symptoms:
+    type: array
+    items: string
+    max_items: 5
+    description: "Observable symptoms (errors, broken behavior)"
+  root_cause:
+    type: string
+    description: "Fundamental technical cause of the problem"
+
+# --- Knowledge track optional fields ----------------------------------------
+knowledge_optional:
+  applies_when:
+    type: array
+    items: string
+    max_items: 5
+    description: "Conditions or situations where this guidance applies"
+  derived_from:
+    type: array
+    items: string
+    description: "Source learnings this pattern was derived from (pattern docs only)"
+
+# --- Validation rules --------------------------------------------------------
+validation_rules:
+  - "Determine track from category using the tracks section above"
+  - "All required fields must be present"
+  - "Enum fields must match allowed values exactly"
+  - "date fields must match YYYY-MM-DD format"
+  - "tags should be lowercase and hyphen-separated"
+  - "Bug-track optional fields on knowledge-track docs are harmless (backward compat)"

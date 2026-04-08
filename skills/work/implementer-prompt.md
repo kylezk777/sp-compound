@@ -63,8 +63,12 @@ Task tool (general-purpose):
     - You need to understand code beyond what was provided and can't find clarity
     - You feel uncertain about whether your approach is correct
     - The task involves restructuring existing code in ways the plan didn't anticipate
+    - You've been reading file after file trying to understand the system without progress
 
-    **How to escalate:** Report back with status BLOCKED or NEEDS_CONTEXT.
+    **How to escalate:** Report back with status BLOCKED or NEEDS_CONTEXT. Describe
+    specifically what you're stuck on, what you've tried, and what kind of help you need.
+    The controller can provide more context, re-dispatch with a more capable model,
+    or break the task into smaller pieces.
 
     ## Before Reporting Back: Self-Review
 

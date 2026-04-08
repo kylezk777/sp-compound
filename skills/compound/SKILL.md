@@ -11,9 +11,52 @@ Capture solved problems into structured, searchable knowledge documents in `docs
 
 **Announce at start:** "I'm using the sp-compound compound skill to capture this learning."
 
+## Preconditions (advisory)
+
+Before proceeding, verify:
+- Problem has been solved (not in-progress)
+- Solution has been verified working
+- Non-trivial problem (not a simple typo or obvious error)
+
+If any precondition is not met, note the gap and ask whether to proceed anyway.
+
+## Execution Strategy
+
+**Full mode is the default.** Proceed directly to Phase 0.5 unless the user explicitly requests compact-safe mode (e.g., `--compact` or "use compact mode").
+
+### Compact-Safe Mode
+
+Single-pass fallback for context-constrained sessions. Skips parallel subagents entirely.
+
+The orchestrator performs ALL work in one sequential pass:
+1. **Extract** from conversation: identify problem and solution. Check auto memory if available.
+2. **Classify**: read `references/solution-schema.yaml` and `references/yaml-schema.md`, determine track and category
+3. **Write minimal doc**: create `docs/solutions/<category>/YYYY-MM-DD-<slug>.md` using the appropriate track template from `references/resolution-template.md`
+4. **Skip** overlap check and Phase 3 discoverability (suggest running `sp-compound:compound-refresh` later)
+
+Output:
+```
+Learning captured (compact-safe mode): docs/solutions/<category>/<filename>.md
+
+Note: Created in compact-safe mode. For richer documentation (cross-references,
+overlap detection), re-run compound in a fresh session.
+```
+
+---
+
 ## Phase 0.5: Auto Memory Scan
 
-Check the project's auto memory directory (if it exists) for relevant notes. Pass relevant entries as supplementary context to Phase 1 agents. Conversation history takes priority over memory notes.
+1. Read MEMORY.md from the auto memory directory (path is in system prompt context)
+2. If the directory or MEMORY.md does not exist, is empty, or is unreadable — skip and proceed to Phase 1
+3. Scan entries for anything related to the problem being documented (semantic judgment, not keyword matching)
+4. If relevant entries found, pass them as a labeled block to Phase 1 agent prompts:
+   ```
+   ## Supplementary notes from auto memory
+   Treat as additional context, not primary evidence.
+   Conversation history and codebase findings take priority.
+   [relevant entries]
+   ```
+5. If any memory notes end up in the final document, tag them with "(auto memory)" so their origin is clear to future readers
 
 ## Phase 1: Parallel Research (3 agents)
 
@@ -53,7 +96,12 @@ Returns: structured text content. Does NOT write files.
 ### Agent 3: Related Docs Finder
 
 Dispatch a subagent that:
-1. Searches `docs/solutions/` using grep-first strategy
+1. Searches `docs/solutions/` using grep-first strategy:
+   - Extract keywords from problem context (module names, technical terms, error messages)
+   - If category is clear, narrow search to `docs/solutions/<category>/`
+   - Use native content-search tool (e.g., Grep) to pre-filter candidates before reading: search frontmatter fields (`title:`, `tags:`, `module:`, `component:`) in parallel, case-insensitive
+   - If >25 candidates: re-run with more specific patterns. If <3: broaden to full content search
+   - Read only frontmatter (first 30 lines) to score relevance; fully read only strong/moderate matches
 2. Scores overlap across 5 dimensions:
    - Problem statement similarity
    - Root cause similarity
@@ -61,7 +109,7 @@ Dispatch a subagent that:
    - Referenced files overlap
    - Prevention rules similarity
 3. Classifies overlap: **high** (3+ dimensions match) / **moderate** (1-2 match) / **low** (0 match)
-4. Optionally searches GitHub issues via `gh` if available
+4. Searches GitHub issues: prefer `gh issue list --search "<keywords>" --state all --limit 5`. If `gh` is not installed, fall back to GitHub MCP tools if available. If neither is available, skip and note it was skipped.
 
 Returns: overlap assessment + matching doc paths. Does NOT write files.
 
@@ -73,7 +121,7 @@ Collect all Phase 1 results. Check overlap score:
 
 | Overlap | Action |
 |---------|--------|
-| **High** (3+ dimensions match) | Update the existing document with new information rather than creating a duplicate |
+| **High** (3+ dimensions match) | Update the existing document rather than creating a duplicate. Preserve its file path and frontmatter structure. Update solution, code examples, prevention tips, and stale references. Add `last_updated: YYYY-MM-DD`. Do not change the title unless the problem framing materially shifted. |
 | **Moderate** (1-2 match) | Create new document, add a note flagging potential future consolidation |
 | **Low/None** | Create new document normally |
 
@@ -87,13 +135,42 @@ If `docs/solutions/` doesn't exist yet:
 
 ## Phase 2.5: Selective Refresh Check
 
-If the new learning CONTRADICTS or SUPERSEDES content in an existing document (detected by Related Docs Finder), conditionally invoke `sp-compound:compound-refresh` targeted at the specific document.
-
 **Always capture the new learning first. Refresh is a follow-up.**
+
+Invoke `sp-compound:compound-refresh` selectively when the new learning suggests older docs may now be inaccurate:
+
+**When to invoke:**
+- A related doc recommends an approach the new fix now contradicts
+- The new fix clearly supersedes an older documented solution
+- The work involved a refactor, migration, or dependency upgrade that likely invalidated older references
+- Related Docs Finder reported moderate overlap suggesting consolidation opportunities
+
+**When NOT to invoke:**
+- No related docs found
+- Related docs still appear consistent with the new learning
+- Overlap is superficial and doesn't change prior guidance
+
+**Scope hints** — always pass the narrowest useful scope:
+- Specific file when one doc is the likely stale artifact
+- Module/component name when several related docs may need review
+- Category name when drift is concentrated in one area
+
+Examples: `sp-compound:compound-refresh auth-middleware`, `sp-compound:compound-refresh performance-issues`
+
+Do not invoke without an argument unless the user explicitly wants a broad sweep. If context is already tight (compact-safe mode), recommend refresh as the next step rather than running it.
 
 ## Phase 3: Discoverability Check
 
 Read and follow `references/discoverability-check.md`. Verify that project instruction files would lead agents to discover `docs/solutions/`.
+
+## Common Mistakes
+
+| Wrong | Correct |
+|-------|---------|
+| Subagents write files | Subagents return text data; orchestrator writes one final file |
+| Research and assembly run in parallel | Phase 1 completes -> then Phase 2 assembly runs |
+| Multiple files created during workflow | One solution doc written or updated (plus optional instruction-file edit for discoverability) |
+| Creating a new doc when existing doc covers the same problem | Check overlap assessment; update existing doc when overlap is high |
 
 ## Output
 
@@ -107,11 +184,13 @@ Track: <bug|knowledge>
 Category: <category>
 Tags: <tags>
 
-Next steps:
-1. Review the captured learning
-2. Continue with other work
+What's next?
+1. Continue with other work (recommended)
+2. Review the captured learning
 3. Run sp-compound:compound-refresh (if overlap detected)
 ```
+
+After displaying the output, present the "What's next?" options using the platform's blocking question tool (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). If no question tool is available, present the numbered options and wait for the user's reply. Do not end the turn without the user's selection.
 
 ## Integration
 
@@ -128,7 +207,7 @@ Next steps:
 - `sp-compound:brainstorm` — lightweight frontmatter grep during Phase 1
 
 **Reference files (read on demand, not bulk-loaded):**
-- `references/solution-schema.yaml` — frontmatter field definitions
+- `references/solution-schema.yaml` — frontmatter field definitions and track classification
 - `references/yaml-schema.md` — category-to-directory mapping
 - `references/resolution-template.md` — document section templates
 - `references/discoverability-check.md` — instruction file verification

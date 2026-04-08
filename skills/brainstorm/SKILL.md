@@ -9,6 +9,8 @@ Help turn ideas into fully formed requirements documents through natural collabo
 
 Start by checking for existing work and project context, then ask questions one at a time to refine the idea. Once you understand what to build, present the requirements and get user approval.
 
+All file references in generated documents must use repo-relative paths (e.g., `src/models/user.rb`), never absolute paths.
+
 <HARD-GATE>
 Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented requirements and the user has approved them. This applies to EVERY project regardless of perceived simplicity.
 </HARD-GATE>
@@ -22,15 +24,17 @@ Every project goes through this process. The requirements can be short (a few se
 You MUST create a task for each of these items and complete them in order:
 
 1. **Resume check** — search for existing brainstorm work
-2. **Context scan** — check project files, docs, recent commits, knowledge store
-3. **Offer Visual Companion** — if topic involves visual questions (its own message, not combined)
-4. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
-5. **Propose 2-3 approaches** — with trade-offs and your recommendation
-6. **Present requirements** — grouped by theme, get user approval
-7. **Write requirements doc** — save to `docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md`
-8. **Requirements self-review** — check for placeholders, contradictions, ambiguity, scope
-9. **User reviews written requirements** — ask user to review before proceeding
-10. **Transition to planning** — invoke sp-compound:plan skill
+2. **Classify and route** — software vs non-software, assess scope (Lightweight/Standard/Deep), bypass if requirements already clear
+3. **Context scan** — check project files, docs, recent commits, knowledge store; verify claims against codebase
+4. **Product pressure test** — challenge the request to catch misframing (scaled to scope)
+5. **Offer Visual Companion** — if topic involves visual questions (its own message, not combined)
+6. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
+7. **Propose 2-3 approaches** — with trade-offs; present all then recommend
+8. **Present requirements** — grouped by theme, get user approval
+9. **Write requirements doc** — save to `docs/brainstorms/YYYY-MM-DD-<topic>-requirements.md`
+10. **Requirements self-review** — check for placeholders, contradictions, ambiguity, scope
+11. **User reviews written requirements** — ask user to review before proceeding
+12. **Transition to planning** — resolve blocking questions, then invoke sp-compound:plan skill
 
 ## Phase 0: Resume Detection
 
@@ -54,6 +58,30 @@ Which approach?
 
 If resuming: read document, summarize current state, identify outstanding questions, and build on existing decisions rather than duplicating effort.
 
+## Phase 0.5: Classify and Route
+
+### Task Domain
+
+Classify whether this is a software task before proceeding:
+
+- **Software** (continue to Scope Assessment below) -- references code, repos, APIs, databases, or asks to build/modify/debug/deploy software.
+- **Non-software brainstorming** -- BOTH: no software signals present AND the user wants to explore/decide/think through something in a non-software domain. Facilitate conversationally using diverse angles (inversion, constraint removal, analogy), separate generation from evaluation, converge by reflecting priorities back, and synthesize a summary. Do not follow the software phases below.
+- **Neither** -- quick-help request, error message, factual question, single-step task. Respond directly, skip all brainstorming phases.
+
+### Scope Assessment
+
+Classify work scope using the feature description and a light repo scan:
+
+- **Lightweight** -- small, well-bounded, low ambiguity
+- **Standard** -- normal feature or bounded refactor with some decisions to make
+- **Deep** -- cross-cutting, strategic, or highly ambiguous
+
+If the scope is unclear, ask one targeted question to disambiguate. Match ceremony to scope throughout: lightweight brainstorms stay compact, deep brainstorms explore fully.
+
+### Clear Requirements Bypass
+
+If the user already provides specific acceptance criteria, references existing patterns, describes exact expected behavior, or has a constrained well-defined scope -- skip Phases 1-2 entirely. Confirm understanding, then go straight to Phase 4 (present requirements) or Phase 6 (transition) if a requirements doc adds no value.
+
 ## Phase 1: Context Scan
 
 Before asking questions, gather project context:
@@ -66,7 +94,11 @@ Before asking questions, gather project context:
 - Search for prior brainstorms, plans, specs related to this topic
 - Check recent git history for related work
 
-### 1.3 Lightweight Learnings Check
+### 1.3 Verify Before Claiming
+
+When the brainstorm touches checkable infrastructure (database tables, routes, config files, dependencies, model definitions), read the relevant source files to confirm what actually exists. Any claim that something is absent -- a missing table, an endpoint that doesn't exist, a dependency not listed -- must be verified against the codebase first. If not verified, label it as an unverified assumption.
+
+### 1.4 Lightweight Learnings Check
 
 Search `docs/solutions/` frontmatter for related historical experience:
 
@@ -81,7 +113,19 @@ Grep docs/solutions/**/*.md for module/component/tags matching the topic
   - This affects scope assessment and risk evaluation
 - If `docs/solutions/` doesn't exist, note it and move on
 
-## Phase 1.5: Visual Companion
+## Phase 1.5: Product Pressure Test
+
+Before generating approaches, challenge the request to catch misframing. Match depth to scope:
+
+**Lightweight:** Is this solving the real user problem? Are we duplicating something that already covers this?
+
+**Standard:** Is this the right problem, or a proxy for a more important one? What user or business outcome actually matters? What happens if we do nothing? Is there a nearby framing that creates more value without more carrying cost?
+
+**Deep:** Standard questions plus: What durable capability should this create in 6-12 months? Does this move the product toward that, or is it only a local patch?
+
+Use the result to sharpen the conversation, not to override the user's intent.
+
+## Phase 1.75: Visual Companion
 
 If upcoming questions will involve visual content (mockups, layouts, diagrams, architecture), offer the companion once for consent:
 
@@ -99,12 +143,12 @@ A question about a UI topic is not automatically a visual question. "What does p
 
 ## Phase 2: Interactive Q&A
 
-### Scope Assessment
-Before detailed questions, assess scope:
+### Decomposition Check
 - If the request describes multiple independent subsystems → flag immediately, help decompose
 - If too large for a single spec → break into sub-projects, brainstorm first one
 
 ### Question Guidelines
+- Ask what the user is already thinking before offering your own ideas -- surfaces hidden context and prevents fixation on AI-generated framings
 - One question at a time — don't overwhelm
 - Prefer multiple choice when possible
 - Focus on: purpose, constraints, success criteria, user expectations
@@ -113,7 +157,8 @@ Before detailed questions, assess scope:
 ## Phase 3: Propose Approaches
 
 - Propose 2-3 different approaches with trade-offs
-- Lead with your recommended option and explain why
+- Use at least one non-obvious angle -- inversion (what if we did the opposite?), constraint removal (what if X weren't a limitation?), or analogy from another domain
+- Present all approaches first, then state your recommendation -- leading with a recommendation before the user sees alternatives anchors the conversation prematurely
 - Present conversationally, not as a formal comparison matrix
 
 ## Phase 4: Present Requirements
@@ -189,11 +234,46 @@ Wait for user response. If changes requested, make them and re-run self-review. 
 
 ## Phase 6: Transition to Planning
 
-**Terminal state: invoke sp-compound:plan**
+### Blocking Questions Gate
 
-Do NOT invoke any other skill. sp-compound:plan is the next step.
+If `Resolve Before Planning` in the requirements document contains any items, do NOT proceed to planning. Instead:
+- Ask the blocking questions now, one at a time
+- If the user wants to proceed anyway, convert each remaining item into an explicit decision, assumption, or `Deferred to Planning` question first
+- If the user wants to pause, present the brainstorm as paused/blocked
 
-If the work is trivially simple and user agrees, may skip planning and invoke sp-compound:work directly.
+### Handoff Options
+
+Present next steps:
+- **Proceed to planning (Recommended)** -- invoke sp-compound:plan with the requirements doc path
+- **Proceed directly to work** -- only when scope is lightweight, success criteria are clear, scope boundaries are clear, and no technical questions remain. Invoke sp-compound:work.
+- **Ask more questions** -- return to Phase 2 Q&A
+- **Done for now** -- return later
+
+Do NOT invoke any skill other than sp-compound:plan or sp-compound:work.
+
+### Closing Summary
+
+When the workflow ends or hands off, display:
+
+```
+Brainstorm complete!
+Requirements doc: <path>  (if created)
+Key decisions:
+- [Decision 1]
+- [Decision 2]
+Recommended next step: sp-compound:plan
+```
+
+If paused with blocking questions remaining:
+
+```
+Brainstorm paused.
+Requirements doc: <path>  (if created)
+Planning is blocked by:
+- [Blocking question 1]
+- [Blocking question 2]
+Resume brainstorm to resolve these before planning.
+```
 
 ## Key Principles
 

@@ -23,6 +23,8 @@ sp-compound skills override default system prompt behavior, but **user instructi
 2. **sp-compound skills** — override default system behavior where they conflict
 3. **Default system prompt** — lowest priority
 
+If CLAUDE.md or AGENTS.md says "don't use TDD" and a skill says "always use TDD," follow the user's instructions. The user is in control.
+
 ## How to Access Skills
 
 Use the `Skill` tool. When you invoke a skill, its content is loaded and presented to you — follow it directly. Never use the Read tool on skill files.
@@ -31,7 +33,29 @@ Use the `Skill` tool. When you invoke a skill, its content is loaded and present
 
 ## The Rule
 
-**Invoke relevant or requested skills BEFORE any response or action.** Even a 1% chance a skill might apply means you should invoke the skill to check.
+**Invoke relevant or requested skills BEFORE any response or action.** Even a 1% chance a skill might apply means you should invoke the skill to check. If an invoked skill turns out to be wrong for the situation, you don't need to use it.
+
+```dot
+digraph skill_flow {
+    "User message received" [shape=doublecircle];
+    "Might any skill apply?" [shape=diamond];
+    "Invoke Skill tool" [shape=box];
+    "Announce: 'Using [skill] to [purpose]'" [shape=box];
+    "Has checklist?" [shape=diamond];
+    "Create TodoWrite todo per item" [shape=box];
+    "Follow skill exactly" [shape=box];
+    "Respond (including clarifications)" [shape=doublecircle];
+
+    "User message received" -> "Might any skill apply?";
+    "Might any skill apply?" -> "Invoke Skill tool" [label="yes, even 1%"];
+    "Might any skill apply?" -> "Respond (including clarifications)" [label="definitely not"];
+    "Invoke Skill tool" -> "Announce: 'Using [skill] to [purpose]'";
+    "Announce: 'Using [skill] to [purpose]'" -> "Has checklist?";
+    "Has checklist?" -> "Create TodoWrite todo per item" [label="yes"];
+    "Has checklist?" -> "Follow skill exactly" [label="no"];
+    "Create TodoWrite todo per item" -> "Follow skill exactly";
+}
+```
 
 ## Skill Routing
 
@@ -51,11 +75,14 @@ Use the `Skill` tool. When you invoke a skill, its content is loaded and present
 | Trigger | Skill | Purpose |
 |---------|-------|---------|
 | Bug, test failure, unexpected behavior | `sp-compound:debug` | Systematic root-cause investigation before fixing |
+| Bug reported in a GitHub issue | `sp-compound:reproduce-bug` | Hypothesis-driven reproduction and investigation from issue reports |
 | Received review feedback to address | `sp-compound:receiving-review` | Technical evaluation of review feedback before implementing |
 | Implementing any feature/bugfix | `sp-compound:flexible-tdd` | TDD with strategy: test-first / characterization-first / pragmatic |
 | About to claim work is done | `sp-compound:verification` | Evidence before claims — run verification, then report |
 | Need isolated workspace | `sp-compound:git-worktree` | Create git worktree for parallel development |
+| Ready to commit, push, and open PR | `sp-compound:git-commit-push-pr` | Adaptive PR descriptions that scale with change complexity |
 | Implementation done, ship it | `sp-compound:finishing-branch` | Verify tests, present merge/PR/cleanup options |
+| Creating or editing agent skills | `sp-compound:writing-skills` | TDD methodology for skill authoring — pressure test, write, refine |
 
 ### Workflow Chain
 
@@ -93,10 +120,15 @@ These thoughts mean STOP — you're rationalizing:
 | "This is just a simple question" | Questions are tasks. Check for skills. |
 | "I need more context first" | Skill check comes BEFORE clarifying questions. |
 | "Let me explore the codebase first" | Skills tell you HOW to explore. Check first. |
+| "I can check git/files quickly" | Files lack conversation context. Check for skills. |
+| "Let me gather information first" | Skills tell you HOW to gather information. |
 | "This doesn't need a formal skill" | If a skill exists, use it. |
 | "I remember this skill" | Skills evolve. Read current version. |
+| "This doesn't count as a task" | Action = task. Check for skills. |
 | "The skill is overkill" | Simple things become complex. Use it. |
 | "I'll just do this one thing first" | Check BEFORE doing anything. |
+| "This feels productive" | Undisciplined action wastes time. Skills prevent this. |
+| "I know what that means" | Knowing the concept is not using the skill. Invoke it. |
 
 ## Knowledge Flywheel
 

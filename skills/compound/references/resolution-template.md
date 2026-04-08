@@ -39,6 +39,10 @@ What fixed it? Include code snippets if helpful.
 ## Prevention
 
 How to prevent this from happening again. Tests, linting rules, architectural changes.
+
+## Related Issues
+
+Links to related docs, issues, or PRs, if any.
 ```
 
 ## Knowledge Track Template
@@ -76,6 +80,10 @@ When this guidance does and does NOT apply. Boundary conditions.
 ## Examples
 
 Code examples showing the recommended approach in practice. (Optional)
+
+## Related
+
+Links to related docs, issues, or PRs, if any.
 ```
 
 ## Pattern Document Template

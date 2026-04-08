@@ -15,6 +15,13 @@ Write tests first. Watch them fail. Write minimal code to pass. But choose the R
 
 The plan's **execution note** per implementation unit determines which strategy to use. Default is always **test-first**.
 
+**Exceptions (ask your human partner):**
+- Throwaway prototypes (throw away when done, don't ship)
+- Generated code
+- See Strategy 3 for configuration/non-behavioral changes
+
+Thinking "skip TDD just this once"? Stop. That's rationalization.
+
 ### Strategy 1: test-first (DEFAULT)
 
 SP's TDD Iron Law. Use for all new features, bug fixes, refactoring, behavior changes.
@@ -28,7 +35,10 @@ Write code before the test? Delete it. Start over.
 **No exceptions:**
 - Don't keep it as "reference"
 - Don't "adapt" it while writing tests
+- Don't look at it
 - Delete means delete
+
+Implement fresh from tests. Period.
 
 **Red-Green-Refactor:**
 
@@ -37,8 +47,12 @@ Write code before the test? Delete it. Start over.
    - Clear name describing behavior
    - Real code, no mocks unless unavoidable
 2. **Verify RED** — Run test, confirm it FAILS for the right reason (feature missing, not typo)
+   - Test passes? You're testing existing behavior. Fix test.
+   - Test errors? Fix error, re-run until it fails correctly.
 3. **GREEN** — Write simplest code to pass the test. Nothing more.
 4. **Verify GREEN** — Run test, confirm it PASSES. Confirm other tests still pass.
+   - Test fails? Fix code, not test.
+   - Other tests fail? Fix now.
 5. **REFACTOR** — Clean up while keeping tests green. Don't add behavior.
 6. **Repeat** — Next failing test for next behavior.
 
@@ -50,8 +64,13 @@ Write code before the test? Delete it. Start over.
 | "I'll test after" | Tests passing immediately prove nothing. |
 | "Need to explore first" | Fine. Throw away exploration, start with TDD. |
 | "TDD will slow me down" | TDD is faster than debugging. |
-| "Manual test faster" | Manual doesn't prove edge cases. |
+| "Manual test faster" | Manual doesn't prove edge cases. You'll re-test every change. |
+| "Already manually tested" | Ad-hoc ≠ systematic. No record, can't re-run. |
 | "Keep as reference" | You'll adapt it. That's testing after. Delete means delete. |
+| "Tests after achieve same goals" | Tests-after = "what does this do?" Tests-first = "what should this do?" |
+| "Deleting X hours is wasteful" | Sunk cost fallacy. Keeping unverified code is technical debt. |
+| "TDD is dogmatic, I'm being pragmatic" | TDD IS pragmatic. "Pragmatic" shortcuts = debugging in production = slower. |
+| "Existing code has no tests" | You're improving it. Add tests for existing code. |
 
 ### Strategy 2: characterization-first (LEGACY CODE)
 
@@ -111,6 +130,32 @@ Before marking work complete:
 - [ ] Tests use real code (mocks only if unavoidable)
 - [ ] Edge cases and errors covered
 
+## Good Tests
+
+| Quality | Good | Bad |
+|---------|------|-----|
+| **Minimal** | One thing. "and" in name? Split it. | `test('validates email and domain and whitespace')` |
+| **Clear** | Name describes behavior | `test('test1')` |
+| **Shows intent** | Demonstrates desired API | Obscures what code should do |
+
+## Red Flags - STOP and Start Over
+
+- Code before test
+- Test after implementation
+- Test passes immediately
+- Can't explain why test failed
+- Tests added "later"
+- Rationalizing "just this once"
+- "I already manually tested it"
+- "Tests after achieve the same purpose"
+- "It's about spirit not ritual"
+- "Keep as reference" or "adapt existing code"
+- "Already spent X hours, deleting is wasteful"
+- "TDD is dogmatic, I'm being pragmatic"
+- "This is different because..."
+
+**All of these mean: Delete code. Start over with TDD.**
+
 ## When Stuck
 
 | Problem | Solution |
@@ -120,6 +165,31 @@ Before marking work complete:
 | Must mock everything | Code too coupled. Use dependency injection. |
 | Test setup huge | Extract helpers. Still complex? Simplify design. |
 | Test fails for unexpected reason | Invoke `sp-compound:debug` — find root cause before fixing. |
+
+## Debugging Integration
+
+Bug found? Write failing test reproducing it. Follow TDD cycle. Test proves fix and prevents regression.
+
+Never fix bugs without a test.
+
+## Testing Anti-Patterns
+
+When adding mocks or test utilities, watch for these common pitfalls:
+- Testing mock behavior instead of real behavior
+- Adding test-only methods to production classes
+- Mocking without understanding dependencies
+- Incomplete mocks that hide structural assumptions
+
+For detailed examples, gate functions, and fixes: read `testing-anti-patterns.md` in this directory.
+
+## Final Rule
+
+```
+Production code → test exists and failed first
+Otherwise → not TDD
+```
+
+No exceptions without your human partner's permission.
 
 ## Integration
 

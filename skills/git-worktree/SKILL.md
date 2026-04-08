@@ -67,9 +67,10 @@ No .gitignore verification needed — outside project entirely.
 
 1. **Detect project name:** `project=$(basename "$(git rev-parse --show-toplevel)")`
 2. **Create worktree:** `git worktree add "$path" -b "$BRANCH_NAME"`
-3. **Run project setup:** Auto-detect from package.json/Cargo.toml/go.mod/requirements.txt
-4. **Verify clean baseline:** Run tests. If fail: report + ask. If pass: report ready.
-5. **Report location:** Full path, test count, ready status.
+3. **Copy environment files:** Copy `.env`, `.env.local`, `.env.test`, and similar dotenv files from the main repo to the worktree. These are gitignored and won't exist in the new worktree without explicit copying.
+4. **Run project setup:** Auto-detect from package.json/Cargo.toml/go.mod/requirements.txt/pyproject.toml
+5. **Verify clean baseline:** Run tests. If fail: report + ask. If pass: report ready.
+6. **Report location:** Full path, test count, ready status.
 
 ## Red Flags
 
@@ -78,6 +79,7 @@ No .gitignore verification needed — outside project entirely.
 - Skip baseline test verification
 - Proceed with failing tests without asking
 - Assume directory location when ambiguous
+- Skip CLAUDE.md check for directory preference
 
 **Always:**
 - Follow directory priority: existing > CLAUDE.md > ask

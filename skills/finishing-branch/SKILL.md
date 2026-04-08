@@ -34,6 +34,8 @@ npm test / cargo test / pytest / go test ./...
 git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null
 ```
 
+If detection fails or is ambiguous, ask: "This branch split from main -- is that correct?"
+
 ### Step 3: Present Options
 
 Present exactly these 4 options:
@@ -73,14 +75,14 @@ gh pr create --title "<title>" --body "$(cat <<'EOF'
 EOF
 )"
 ```
-Then: Cleanup worktree (Step 5)
+Keep worktree for PR revisions.
 
 #### Option 3: Keep As-Is
 Report: "Keeping branch <name>. Worktree preserved at <path>."
 **Don't cleanup worktree.**
 
 #### Option 4: Discard
-Confirm first — require typed "discard" confirmation. Then:
+Confirm first — show what will be lost (branch name, commits, worktree path) and require typed "discard" confirmation. Then:
 ```bash
 git checkout <base-branch>
 git branch -D <feature-branch>
@@ -89,13 +91,13 @@ Then: Cleanup worktree (Step 5)
 
 ### Step 5: Cleanup Worktree
 
-For Options 1, 2, 4 — check if in worktree and remove:
+For Options 1 and 4 — check if in worktree and remove:
 ```bash
 git worktree list | grep $(git branch --show-current)
 git worktree remove <worktree-path>
 ```
 
-For Option 3: Keep worktree.
+For Options 2 and 3: Keep worktree (may need it for PR revisions or later work).
 
 ## Red Flags
 
@@ -114,7 +116,7 @@ For Option 3: Keep worktree.
 ## Integration
 
 **Called by:**
-- **sp-compound:work** (Phase 5) — after review passes
+- **sp-compound:work** (Phase 4) — after review passes
 - Any workflow completing a feature branch
 
 **Pairs with:**

@@ -1,6 +1,8 @@
 # Category-to-Directory Mapping
 
-Problem type determines which directory under `docs/solutions/` the document belongs to.
+Category determines which directory under `docs/solutions/` the document belongs to, and which track (bug or knowledge) applies.
+
+## Bug Track Categories
 
 | Category | Directory | Typical Problems |
 |----------|-----------|-----------------|
@@ -13,7 +15,21 @@ Problem type determines which directory under `docs/solutions/` the document bel
 | ui-bugs | `docs/solutions/ui-bugs/` | Rendering issues, interaction bugs, layout problems |
 | integration-issues | `docs/solutions/integration-issues/` | API failures, third-party service issues, webhook problems |
 | logic-errors | `docs/solutions/logic-errors/` | Business logic bugs, incorrect calculations, state machine issues |
-| (patterns) | `docs/solutions/patterns/` | Recurring solutions abstracted from multiple learnings |
+
+## Knowledge Track Categories
+
+| Category | Directory | Typical Content |
+|----------|-----------|-----------------|
+| best-practices | `docs/solutions/best-practices/` | Recommended approaches, coding standards, proven patterns |
+| workflow-issues | `docs/solutions/workflow-issues/` | Development workflow improvements, process optimizations |
+| developer-experience | `docs/solutions/developer-experience/` | Local dev setup, tooling, CI/CD friction, contributor ergonomics |
+| documentation-gaps | `docs/solutions/documentation-gaps/` | Missing docs, unclear APIs, undocumented behavior |
+
+## Derived Documents
+
+| Category | Directory | Typical Content |
+|----------|-----------|-----------------|
+| patterns | `docs/solutions/patterns/` | Recurring solutions abstracted from multiple learnings |
 
 ## Filename Convention
 
@@ -27,6 +43,6 @@ Example: `docs/solutions/runtime-errors/2026-03-31-redis-pool-exhaustion.md`
 
 Pattern docs live in `docs/solutions/patterns/` and are DERIVED from multiple learning docs. They:
 - Generalize a recurring solution across modules
-- Reference the specific learnings they're derived from
+- Reference the specific learnings they're derived from (use `derived_from` in frontmatter)
 - Have `track: knowledge` in frontmatter
 - Are higher-leverage but also higher-risk when stale

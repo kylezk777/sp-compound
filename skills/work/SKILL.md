@@ -42,6 +42,7 @@ Read the plan fully. It's a decision artifact, not an execution script. Check:
 Check current git branch vs default branch, offer options:
 
 1. **Continue on current feature branch** (if already on one)
+   - If the branch name is auto-generated or meaningless (e.g., `worktree-jolly-beaming-raven`), suggest renaming to something derived from the plan title (e.g., `feat/crowd-sniff`)
 2. **Create a new branch** (if on default branch)
 3. **Use git worktree** — invoke `sp-compound:git-worktree` (recommended for parallel dev)
 4. **Continue on default branch** (requires explicit user confirmation — dangerous)
@@ -71,6 +72,8 @@ Use `./implementer-prompt.md` template. Provide:
 - Scene-setting context (where this fits, what was built before)
 - Working directory
 - Execution note (test-first / characterization-first / pragmatic)
+
+**Permission mode:** Omit the `mode` parameter when dispatching subagents so the user's configured permission settings apply. Do not pass `mode: "auto"` — it overrides user-level settings.
 
 **Model selection:**
 - 1-2 files with complete spec → cheapest capable model (e.g., haiku)
@@ -114,19 +117,56 @@ For trivial/small work without subagents:
 
 1. Follow the plan steps directly
 2. Use `sp-compound:flexible-tdd` for the execution note's strategy
-3. Run tests after each change
-4. Commit incrementally
+3. Follow existing patterns — read plan-referenced files first, match naming conventions, reuse existing components
+4. Run tests after each change
+5. Commit incrementally
+
+**Execution posture guardrails:**
+- When working test-first: do not write the test and implementation in the same step
+- Do not skip verifying that a new test fails before implementing the fix
+- Do not over-implement beyond the current behavior slice
+- Skip test-first for trivial renames, pure configuration, and pure styling work
+
+**Stop and escalate when:**
+- Hit a blocker (missing dependency, test fails repeatedly, instruction unclear)
+- Plan has critical gaps preventing progress
+- Verification fails and the cause is not obvious
+
+Ask for clarification rather than guessing. Don't force through blockers.
+
+**Revisit the plan when:**
+- User updates the plan based on feedback
+- Fundamental approach needs rethinking mid-execution
+- Implementation reveals the plan's assumptions were wrong
 
 ## Test Discovery
 
 Before changing any file:
 1. Find its existing test files (search for `test_<name>`, `<name>.test`, `<name>_test`)
-2. Check test scenarios against 4 categories:
-   - Happy path
-   - Edge cases
-   - Error/failure paths
-   - Integration scenarios
+2. Check test scenarios against 4 categories and derive missing ones:
+
+   | Category | When it applies | How to derive if missing |
+   |----------|----------------|------------------------|
+   | **Happy path** | Always for feature-bearing units | Read the unit's Goal and Approach for core input/output pairs |
+   | **Edge cases** | Meaningful boundaries (inputs, state, concurrency) | Identify boundary values, empty/nil inputs, concurrent access patterns |
+   | **Error/failure paths** | Failure modes (validation, external calls, permissions) | Enumerate invalid inputs, permission denials, downstream failures |
+   | **Integration** | Crosses layers (callbacks, middleware, multi-service) | Identify the cross-layer chain, exercise without mocks |
+
 3. Supplement gaps before writing tests
+
+## System-Wide Test Check
+
+Before marking a task done, trace the impact of the change:
+
+| Question | Action |
+|----------|--------|
+| **What fires when this runs?** Callbacks, middleware, observers, event handlers — trace two levels out. | Read actual code for callbacks on models touched, middleware in request chain, `after_*` hooks. |
+| **Do tests exercise the real chain?** If every dependency is mocked, the test proves logic in isolation only. | Write at least one integration test through the full callback/middleware chain. No mocks for interacting layers. |
+| **Can failure leave orphaned state?** If code persists state before calling an external service, what happens on failure? | Trace the failure path with real objects. Test that failure cleans up or retry is idempotent. |
+| **What other interfaces expose this?** Mixins, DSLs, alternative entry points. | Search for the method/behavior in related classes. Add parity now, not as a follow-up. |
+| **Do error strategies align across layers?** Retry middleware + application fallback + framework error handling — conflicts? | List error classes at each layer. Verify rescue list matches what lower layer raises. |
+
+**Skip when:** Leaf-node changes with no callbacks, no state persistence, no parallel interfaces. Purely additive changes (new helper, new view partial) need only a 10-second check.
 
 ## Incremental Commits
 
@@ -134,6 +174,26 @@ Before changing any file:
 - Don't commit WIP or partial work
 - Conventional commit messages (feat:, fix:, refactor:, test:)
 - Stage only relevant files (not `git add .`)
+- If merge conflicts arise during rebasing or merging, resolve immediately — incremental commits make this easier
+
+## Simplify as You Go
+
+After every 2-3 completed tasks (or at natural phase boundaries), review recently changed files for:
+- Duplicated patterns that can be consolidated
+- Shared helpers that can be extracted
+- Code reuse and efficiency improvements
+
+Don't simplify after every single task — early patterns may look duplicated but diverge intentionally in later units.
+
+## Post-Deploy Monitoring (include in PR)
+
+For every change that ships, include a brief monitoring section in the PR description or commit notes:
+- **Log queries:** concrete search terms or commands to verify the change works in production
+- **Metrics/dashboards:** what to watch (latency, error rate, throughput)
+- **Healthy signals:** what normal looks like after deploy
+- **Rollback trigger:** what warrants an immediate rollback
+
+Skip for changes that have no runtime impact (docs, comments, dev tooling).
 
 ## Phase 3: Quality Check
 
@@ -148,8 +208,9 @@ After all tasks complete:
 
 After review passes:
 
-1. **Invoke `sp-compound:finishing-branch`** — present merge/PR/cleanup options
-2. **Suggest `sp-compound:compound`** — if a notable problem was solved during this work, suggest capturing the learning
+1. **Update plan status** — if the input document has YAML frontmatter with a `status` field, update it to `completed`
+2. **Invoke `sp-compound:finishing-branch`** — present merge/PR/cleanup options
+3. **Suggest `sp-compound:compound`** — if a notable problem was solved during this work, suggest capturing the learning
 
 ## Key Principles
 

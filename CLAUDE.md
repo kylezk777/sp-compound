@@ -29,6 +29,9 @@ Each stage consumes and/or produces knowledge in `docs/solutions/`, creating a c
 | About to claim work is complete | `sp-compound:verification` |
 | Need isolated workspace | `sp-compound:git-worktree` |
 | Implementation done, need to ship | `sp-compound:finishing-branch` |
+| Bug reported in a GitHub issue | `sp-compound:reproduce-bug` |
+| Ready to commit, push, and open PR | `sp-compound:git-commit-push-pr` |
+| Creating or editing agent skills | `sp-compound:writing-skills` |
 
 ## Knowledge Store
 
