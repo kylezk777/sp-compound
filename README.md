@@ -8,7 +8,7 @@ SP and CE each solve half the problem well:
 
 | | Superpowers (SP) | Compound Engineering (CE) |
 |--|---|---|
-| **Strength** | Rigorous execution — TDD iron law, three-role subagent architecture, verification-before-completion | Knowledge compounding — docs/solutions/ flywheel, research-backed planning, multi-mode review |
+| **Strength** | Rigorous execution — TDD iron law, three-role subagent architecture, verification-before-completion | Knowledge compounding — sp-compound/solutions/ flywheel, research-backed planning, multi-mode review |
 | **Weakness** | No memory across projects; each task starts from zero | Execution discipline less structured; no spec/code-quality review split |
 
 **sp-compound combines both:** SP's execution rigor ensures every task is built correctly, while CE's knowledge flywheel ensures every task makes the next one easier.
@@ -28,7 +28,7 @@ SP and CE each solve half the problem well:
   └──────────┘        └──────────┘                 │compound│─┘
                       SP's 3-role                  └────────┘
                       subagent engine         CE's knowledge store
-                                              docs/solutions/
+                                              sp-compound/solutions/
 ```
 
 ## What You Get From Each Source
@@ -45,7 +45,7 @@ SP and CE each solve half the problem well:
 
 ### From Compound Engineering
 
-- **Knowledge flywheel** — `compound` writes learnings to `docs/solutions/`, `plan` and `review` consume them via `learnings-researcher` agent
+- **Knowledge flywheel** — `compound` writes learnings to `sp-compound/solutions/`, `plan` and `review` consume them via `learnings-researcher` agent
 - **Research-backed planning** — 3 research agents (repo-research-analyst, learnings-researcher, best-practices-researcher) + conditional spec-flow-analyzer investigate before any code is written
 - **Multi-reviewer code review** — 5 specialized reviewers (correctness, testing, security, performance, adversarial) with a 7-step merge pipeline including pre-existing issue detection
 - **Compound-refresh** — 5 maintenance operations (Keep/Update/Consolidate/Replace/Delete) with 3 modes (interactive, autofix, autonomous)
@@ -55,7 +55,7 @@ SP and CE each solve half the problem well:
 ### 1+1 > 2 (Synergies unique to sp-compound)
 
 - **Research-informed TDD** — plan's research agents produce better code blocks, so flexible-tdd's test-first cycle starts from proven patterns instead of guessing
-- **Review consumes learnings** — reviewers check against historically known pitfalls from `docs/solutions/`, catching issues that pure static analysis would miss
+- **Review consumes learnings** — reviewers check against historically known pitfalls from `sp-compound/solutions/`, catching issues that pure static analysis would miss
 - **Debug feeds compound** — when systematic debugging solves a hard problem, compound captures the learning so the same class of bug is caught earlier next time
 - **Spec-flow analysis** — conditional agent for complex state machines, dispatched after research consolidation to inform test scenarios and risk assessment
 
@@ -119,7 +119,7 @@ brainstorm ──► plan ──► work ──► review ──► finishing-br
 | Plan | `sp-compound:plan` | Research codebase + knowledge store, create implementation plan with complete code |
 | Work | `sp-compound:work` | Execute plan using subagent architecture (4 strategies: inline / inline+TDD / serial / parallel) |
 | Review | `sp-compound:review` | Multi-reviewer code review with 7-step merge pipeline |
-| Compound | `sp-compound:compound` | Capture learnings in `docs/solutions/` |
+| Compound | `sp-compound:compound` | Capture learnings in `sp-compound/solutions/` |
 
 ## Supporting Skills
 
@@ -159,7 +159,7 @@ sp-compound/
 └── agents/                          # 9 agents
     ├── research/                    # 4 research agents
     │   ├── repo-research-analyst    # Codebase patterns + architecture
-    │   ├── learnings-researcher     # docs/solutions/ knowledge lookup
+    │   ├── learnings-researcher     # sp-compound/solutions/ knowledge lookup
     │   ├── best-practices-researcher # External guidance (conditional)
     │   └── spec-flow-analyzer       # State machine analysis (conditional)
     └── review/                      # 5 review agents
@@ -172,7 +172,7 @@ sp-compound/
 
 ## Knowledge Store
 
-When a project uses sp-compound, learnings accumulate in `docs/solutions/` with YAML frontmatter:
+When a project uses sp-compound, learnings accumulate in `sp-compound/solutions/` with YAML frontmatter:
 
 ```yaml
 ---
@@ -197,7 +197,7 @@ These learnings are consumed by:
 | D1 | Standalone plugin (no SP runtime dependency) | Clean separation, independent upgrades, shareable |
 | D2 | SP-style plans with complete code blocks | Subagent architecture expects this format; research layer improves quality without changing format |
 | D3 | CE-style brainstorm (requirements, not design) | Clearer separation: brainstorm = WHAT, plan = HOW |
-| D4 | Project-level `docs/solutions/` in git | Team knowledge compounds faster than individual memory |
+| D4 | Project-level `sp-compound/solutions/` in git | Team knowledge compounds faster than individual memory |
 | D5 | Full CE inheritance for compound/compound-refresh | CE's core differentiator; simplification loses material value |
 | D6 | 5 core reviewers (from CE's 16+) | Covers ~80% of value; stack-specific reviewers excluded for tech-agnosticism |
 | D7 | SP's three-role subagent architecture preserved | Work is SP's strongest phase; any modification risks regression |
