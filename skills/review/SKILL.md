@@ -105,8 +105,8 @@ In non-interactive modes: infer conservatively.
 ### Plan Discovery
 Search for plan document (stop at first hit):
 1. `plan:` argument (if provided) -> `plan_source: explicit`
-2. PR body scan for `docs/plans/*.md` paths. Single unambiguous match -> `explicit`. Multiple/ambiguous -> `inferred` for best match.
-3. Auto-discovery: keyword match from branch name against `docs/plans/*.md`. Single unambiguous match -> `inferred`. Ambiguous or generic keywords (review, fix, update) -> skip.
+2. PR body scan for `.sp-compound/plans/*.md` paths. Single unambiguous match -> `explicit`. Multiple/ambiguous -> `inferred` for best match.
+3. Auto-discovery: keyword match from branch name against `.sp-compound/plans/*.md`. Single unambiguous match -> `inferred`. Ambiguous or generic keywords (review, fix, update) -> skip.
 
 If found: extract Requirements Trace for completeness check in Stage 6. Record `plan_source` for routing unaddressed requirements:
 - **explicit**: unaddressed requirements become P1 findings (`manual -> downstream-resolver`)
@@ -123,7 +123,7 @@ If found: extract Requirements Trace for completeness check in Stage 6. Record `
 - performance-reviewer — when diff touches DB queries, data transforms, caching, async
 - adversarial-reviewer — when diff exceeds 50 changed executable (non-test/non-generated/non-lockfile) lines, or touches auth, payments, data mutations, external APIs
 
-**Plus:** Dispatch `learnings-researcher` agent to search `docs/solutions/` for related past issues.
+**Plus:** Dispatch `learnings-researcher` agent to search `.sp-compound/solutions/` for related past issues.
 
 **File-type awareness:** Instruction-prose files (Markdown, JSON schemas, config) do not benefit from runtime-focused reviewers. Count only executable code lines toward line-count thresholds. For diffs that only change prose files, skip adversarial unless the prose describes auth, payment, or data-mutation behavior.
 
@@ -146,7 +146,7 @@ Launch all selected reviewers in parallel. Each receives:
 
 Reviewers are **read-only** — they may use `git diff`, `git blame`, `git log`, `gh pr view` but must NOT edit files, change branches, commit, push, or create PRs.
 
-**Protected artifacts:** Reviewers must NOT recommend deleting or cleaning up files under `docs/brainstorms/`, `docs/plans/`, `docs/solutions/`, or any knowledge store paths documented in project instruction files. These are durable knowledge assets, not dead code.
+**Protected artifacts:** Reviewers must NOT recommend deleting or cleaning up files under `.sp-compound/brainstorms/`, `.sp-compound/plans/`, `.sp-compound/solutions/`, or any knowledge store paths documented in project instruction files. These are durable knowledge assets, not dead code.
 
 ## Stage 5: Merge Pipeline
 
@@ -307,4 +307,4 @@ Autofix, report-only, headless: stop after report and residual handoff. Never co
 - `references/merge-pipeline.md` — merge rules
 - `references/diff-scope.md` — scope classification rules for reviewers
 - `references/resolve-base.sh` — base branch detection script
-- `docs/solutions/` — via learnings-researcher for historical context
+- `.sp-compound/solutions/` — via learnings-researcher for historical context

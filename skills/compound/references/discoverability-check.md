@@ -1,6 +1,6 @@
 # Discoverability Check
 
-Verify that project instruction files would lead agents to discover `docs/solutions/`.
+Verify that project instruction files would lead agents to discover `.sp-compound/solutions/`.
 
 ## When to Run
 
@@ -12,11 +12,11 @@ Identify which root-level instruction files exist (`AGENTS.md`, `CLAUDE.md`, or 
 
 An agent reading the instruction files should learn three things:
 
-1. **That a searchable knowledge store exists** — `docs/solutions/` is mentioned
+1. **That a searchable knowledge store exists** — `.sp-compound/solutions/` is mentioned
 2. **Enough about its structure to search effectively** — category organization, YAML frontmatter fields
 3. **When to search it** — relevant when implementing or debugging in documented areas
 
-This is a **semantic assessment**, not a string match. The information could be a line in an architecture section, a bullet in a gotchas section, spread across multiple places, or expressed without ever using the exact path `docs/solutions/`. Use judgment — if an agent would reasonably discover and use the knowledge store after reading the file, the check passes.
+This is a **semantic assessment**, not a string match. The information could be a line in an architecture section, a bullet in a gotchas section, spread across multiple places, or expressed without ever using the exact path `.sp-compound/solutions/`. Use judgment — if an agent would reasonably discover and use the knowledge store after reading the file, the check passes.
 
 ## If Already Discoverable
 
@@ -33,14 +33,14 @@ No action needed — move on.
 
 When there is an existing directory listing or architecture section — add a line:
 ```
-docs/solutions/  # documented solutions to past problems, organized by category with YAML frontmatter (module, tags, category)
+.sp-compound/solutions/  # documented solutions to past problems, organized by category with YAML frontmatter (module, tags, category)
 ```
 
 When nothing in the file is a natural fit — a small headed section:
 ```markdown
 ## Documented Solutions
 
-`docs/solutions/` — documented solutions to past problems (bugs, best practices, workflow patterns), organized by category with YAML frontmatter (`module`, `tags`, `category`). Relevant when implementing or debugging in documented areas.
+`.sp-compound/solutions/` — documented solutions to past problems (bugs, best practices, workflow patterns), organized by category with YAML frontmatter (`module`, `tags`, `category`). Relevant when implementing or debugging in documented areas.
 ```
 
 These are calibration examples, not templates. Adapt to the file.

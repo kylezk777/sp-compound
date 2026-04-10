@@ -6,7 +6,7 @@ A complete Software Development Discipline (SDD) plugin combining the best of Su
 
 The core cycle: **Brainstorm -> Plan -> Work -> Review -> Compound**
 
-Each stage consumes and/or produces knowledge in `docs/solutions/`, creating a compounding loop where each unit of engineering work makes subsequent work easier.
+Each stage consumes and/or produces knowledge in `.sp-compound/solutions/`, creating a compounding loop where each unit of engineering work makes subsequent work easier.
 
 ## Skill Routing
 
@@ -35,6 +35,6 @@ Each stage consumes and/or produces knowledge in `docs/solutions/`, creating a c
 
 ## Knowledge Store
 
-Project learnings are stored in `docs/solutions/` with YAML frontmatter for searchability. The `sp-compound:compound` skill writes them, `sp-compound:plan` and `sp-compound:review` consume them, and `sp-compound:compound-refresh` maintains them.
+Project learnings are stored in `.sp-compound/solutions/` with YAML frontmatter for searchability. The `sp-compound:compound` skill writes them, `sp-compound:plan` and `sp-compound:review` consume them, and `sp-compound:compound-refresh` maintains them.
 
-When working in a project with `docs/solutions/`, always search it for relevant historical experience before making architectural decisions.
+When working in a project with `.sp-compound/solutions/`, always search it for relevant historical experience before making architectural decisions.
