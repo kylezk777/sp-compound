@@ -67,8 +67,8 @@ digraph skill_flow {
 | Have requirements or detailed idea | `sp-compound:plan` | Research codebase + create implementation plan with code |
 | Have plan, ready to build | `sp-compound:work` | Execute plan using subagent architecture |
 | Code complete, need review | `sp-compound:review` | Multi-reviewer code review with auto-fix |
-| Problem solved, capture learning | `sp-compound:compound` | Document solution in sp-compound/solutions/ knowledge store |
-| Knowledge store maintenance | `sp-compound:compound-refresh` | Review and update stale sp-compound/solutions/ entries |
+| Problem solved, capture learning | `sp-compound:compound` | Document solution in .sp-compound/solutions/ knowledge store |
+| Knowledge store maintenance | `sp-compound:compound-refresh` | Review and update stale .sp-compound/solutions/ entries |
 
 ### Supporting Skills
 
@@ -133,13 +133,13 @@ These thoughts mean STOP — you're rationalizing:
 ## Knowledge Flywheel
 
 sp-compound's unique value is the knowledge flywheel:
-- `compound` writes learnings to `sp-compound/solutions/`
+- `compound` writes learnings to `.sp-compound/solutions/`
 - `plan` reads learnings to write better plans
 - `review` reads learnings to catch known issues
 - `brainstorm` reads learnings for scope/risk assessment
 - `compound-refresh` maintains learnings accuracy
 
-If `sp-compound/solutions/` exists in the project, skills MUST search it for relevant history.
+If `.sp-compound/solutions/` exists in the project, skills MUST search it for relevant history.
 
 ## User Instructions
 

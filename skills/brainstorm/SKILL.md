@@ -31,7 +31,7 @@ You MUST create a task for each of these items and complete them in order:
 6. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 7. **Propose 2-3 approaches** — with trade-offs; present all then recommend
 8. **Present requirements** — grouped by theme, get user approval
-9. **Write requirements doc** — save to `sp-compound/brainstorms/YYYY-MM-DD-<topic>-requirements.md`
+9. **Write requirements doc** — save to `.sp-compound/brainstorms/YYYY-MM-DD-<topic>-requirements.md`
 10. **Requirements self-review** — check for placeholders, contradictions, ambiguity, scope
 11. **User reviews written requirements** — ask user to review before proceeding
 12. **Transition to planning** — resolve blocking questions, then invoke sp-compound:plan skill
@@ -41,7 +41,7 @@ You MUST create a task for each of these items and complete them in order:
 Before starting fresh, check for existing work:
 
 ```
-Search: sp-compound/brainstorms/*-requirements.md
+Search: .sp-compound/brainstorms/*-requirements.md
 ```
 
 If matching documents found, ask:
@@ -100,10 +100,10 @@ When the brainstorm touches checkable infrastructure (database tables, routes, c
 
 ### 1.4 Lightweight Learnings Check
 
-Search `sp-compound/solutions/` frontmatter for related historical experience:
+Search `.sp-compound/solutions/` frontmatter for related historical experience:
 
 ```
-Grep sp-compound/solutions/**/*.md for module/component/tags matching the topic
+Grep .sp-compound/solutions/**/*.md for module/component/tags matching the topic
 ```
 
 - Do NOT deep-read the documents (that's the plan skill's job)
@@ -111,7 +111,7 @@ Grep sp-compound/solutions/**/*.md for module/component/tags matching the topic
 - Purpose: inform the user about existing knowledge
   - "This area has N historical learnings including X-type and Y-type issues"
   - This affects scope assessment and risk evaluation
-- If `sp-compound/solutions/` doesn't exist, note it and move on
+- If `.sp-compound/solutions/` doesn't exist, note it and move on
 
 ## Phase 1.5: Product Pressure Test
 
@@ -200,7 +200,7 @@ Present requirements grouped by logical theme. This document answers WHAT to bui
 - [Technical] <question>
 
 ## Historical Context
-[If learnings were found in sp-compound/solutions/, summarize relevance here]
+[If learnings were found in .sp-compound/solutions/, summarize relevance here]
 ```
 
 **Key rules:**
@@ -214,7 +214,7 @@ Ask after each theme whether it looks right. Be ready to revise.
 ## Phase 5: Write & Review
 
 ### Write Document
-Save to: `sp-compound/brainstorms/YYYY-MM-DD-<topic>-requirements.md`
+Save to: `.sp-compound/brainstorms/YYYY-MM-DD-<topic>-requirements.md`
 
 ### Self-Review
 After writing, check with fresh eyes:

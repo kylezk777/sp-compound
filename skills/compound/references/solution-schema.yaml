@@ -1,5 +1,5 @@
 # Solution Document Schema
-# All sp-compound/solutions/ documents MUST have YAML frontmatter with these fields.
+# All .sp-compound/solutions/ documents MUST have YAML frontmatter with these fields.
 #
 # The schema has two tracks:
 #   Bug track      — solved problems (errors, failures, performance issues)
@@ -57,7 +57,7 @@ required:
       - documentation-gaps
       # Derived documents
       - patterns
-    description: "Auto-detected from problem context. Maps to sp-compound/solutions/<category>/ directory."
+    description: "Auto-detected from problem context. Maps to .sp-compound/solutions/<category>/ directory."
   track:
     type: string
     enum: [bug, knowledge]

@@ -11,7 +11,7 @@ Transform requirements into detailed implementation plans. Research the codebase
 
 **Announce at start:** "I'm using the sp-compound plan skill to create the implementation plan."
 
-**Save plans to:** `sp-compound/plans/YYYY-MM-DD-<feature-name>-plan.md`
+**Save plans to:** `.sp-compound/plans/YYYY-MM-DD-<feature-name>-plan.md`
 
 ## Interaction Method
 
@@ -24,12 +24,12 @@ The plan has two audiences: humans who review it and agents who execute it. Rese
 ## Phase 0: Load Upstream Requirements
 
 ### 0.1 Find Requirements Document
-Search `sp-compound/brainstorms/` for matching `*-requirements.md` files:
+Search `.sp-compound/brainstorms/` for matching `*-requirements.md` files:
 - Semantic match on topic
 - Prefer recent (within 30 days) but use judgment
 
 ### 0.2 Resume Existing Plan
-Search `sp-compound/plans/` for existing plans on this topic:
+Search `.sp-compound/plans/` for existing plans on this topic:
 - If found: ask whether to update or create new
 - If updating: preserve completed checkboxes, modify remaining tasks
 
@@ -178,7 +178,7 @@ When learnings-researcher returns relevant findings:
 | Historical risk | Risks & Dependencies section must include it |
 | Prevention rule | Plan should incorporate the prevention measure |
 
-**Explicit attribution required:** "Based on `sp-compound/solutions/runtime-errors/redis-pool-exhaustion.md`, we use connection pool prewarming..."
+**Explicit attribution required:** "Based on `.sp-compound/solutions/runtime-errors/redis-pool-exhaustion.md`, we use connection pool prewarming..."
 
 ## Phase 2: Resolve Planning Questions
 
@@ -239,7 +239,7 @@ This structure informs the task decomposition. Each task should produce self-con
 
 **Requirements trace:** [R1, R3 — which requirements this task addresses]
 
-**Learnings applied:** [If any: "Based on sp-compound/solutions/X, we..."]
+**Learnings applied:** [If any: "Based on .sp-compound/solutions/X, we..."]
 
 - [ ] **Step 1: Write the failing test**
 
@@ -280,7 +280,7 @@ git commit -m "feat: descriptive message"
 - **DRY, YAGNI:** Don't over-engineer.
 - **Execution notes:** Every task gets an execution note (test-first is default).
 - **Requirements trace:** Every task links back to requirement IDs.
-- **Learnings attribution:** Cite sp-compound/solutions/ when the approach is informed by history.
+- **Learnings attribution:** Cite .sp-compound/solutions/ when the approach is informed by history.
 
 ## Phase 4: Confidence Deepening (Standard/Deep plans only)
 
@@ -320,7 +320,7 @@ Fix issues inline. No need to re-review.
 
 ### 5.2 Write Plan to Disk
 
-Save to `sp-compound/plans/YYYY-MM-DD-<feature-name>-plan.md` BEFORE presenting options.
+Save to `.sp-compound/plans/YYYY-MM-DD-<feature-name>-plan.md` BEFORE presenting options.
 
 ### 5.3 Execution Handoff
 
