@@ -1,13 +1,13 @@
 ---
 name: compound-refresh
-description: Use to maintain docs/solutions/ knowledge store quality. Reviews existing learnings against the current codebase, then updates, consolidates, replaces, or deletes stale documents. Supports interactive and autofix modes.
+description: Use to maintain sp-compound/solutions/ knowledge store quality. Reviews existing learnings against the current codebase, then updates, consolidates, replaces, or deletes stale documents. Supports interactive and autofix modes.
 ---
 
 # Compound Refresh: Maintain the Knowledge Store
 
 ## Overview
 
-Maintain `docs/solutions/` quality by reviewing existing learnings against the current codebase. Keeps the knowledge store accurate so it helps rather than misleads.
+Maintain `sp-compound/solutions/` quality by reviewing existing learnings against the current codebase. Keeps the knowledge store accurate so it helps rather than misleads.
 
 **Announce at start:** "I'm using the sp-compound compound-refresh skill to maintain the knowledge store."
 
@@ -96,7 +96,7 @@ Why: learning docs are the primary evidence. Pattern docs are derived from one o
 
 ## Scope Selection
 
-Discover learnings and pattern docs under `docs/solutions/`, excluding README.md and anything under `_archived/`. If an `_archived/` directory exists, flag it in the report as a legacy artifact that should be cleaned up (files either restored or deleted).
+Discover learnings and pattern docs under `sp-compound/solutions/`, excluding README.md and anything under `_archived/`. If an `_archived/` directory exists, flag it in the report as a legacy artifact that should be cleaned up (files either restored or deleted).
 
 If `$ARGUMENTS` provided, match candidates by (tried in order):
 1. Directory match (subdirectory name)
@@ -325,7 +325,7 @@ For every file processed:
 Split into:
 - **Applied:** successful actions with details
 - **Recommended:** actions that couldn't be applied, with context for manual follow-up
-- **Legacy cleanup** (if `docs/solutions/_archived/` exists): list archived files and recommend disposition (restore, delete, or consolidate)
+- **Legacy cleanup** (if `sp-compound/solutions/_archived/` exists): list archived files and recommend disposition (restore, delete, or consolidate)
 
 ## Integration
 
@@ -334,7 +334,7 @@ Split into:
 - `sp-compound:compound` (Phase 2.5) when new learning contradicts existing docs
 
 **Consumes:**
-- `docs/solutions/` — the knowledge store being maintained
+- `sp-compound/solutions/` — the knowledge store being maintained
 - `skills/compound/references/solution-schema.yaml` — for valid frontmatter fields during Replace
 
 **Relationship to compound:**

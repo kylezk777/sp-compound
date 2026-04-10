@@ -1,13 +1,13 @@
 ---
 name: compound
-description: Use after solving a notable problem to capture the learning into docs/solutions/ knowledge store. Documents the problem, root cause, solution, and prevention so future work benefits from the experience. Creates a compounding knowledge flywheel.
+description: Use after solving a notable problem to capture the learning into sp-compound/solutions/ knowledge store. Documents the problem, root cause, solution, and prevention so future work benefits from the experience. Creates a compounding knowledge flywheel.
 ---
 
 # Compound: Capture Learnings
 
 ## Overview
 
-Capture solved problems into structured, searchable knowledge documents in `docs/solutions/`. Each documented solution compounds your team's knowledge — first-time research takes 30 minutes, documented lookups take 2 minutes.
+Capture solved problems into structured, searchable knowledge documents in `sp-compound/solutions/`. Each documented solution compounds your team's knowledge — first-time research takes 30 minutes, documented lookups take 2 minutes.
 
 **Announce at start:** "I'm using the sp-compound compound skill to capture this learning."
 
@@ -31,12 +31,12 @@ Single-pass fallback for context-constrained sessions. Skips parallel subagents 
 The orchestrator performs ALL work in one sequential pass:
 1. **Extract** from conversation: identify problem and solution. Check auto memory if available.
 2. **Classify**: read `references/solution-schema.yaml` and `references/yaml-schema.md`, determine track and category
-3. **Write minimal doc**: create `docs/solutions/<category>/YYYY-MM-DD-<slug>.md` using the appropriate track template from `references/resolution-template.md`
+3. **Write minimal doc**: create `sp-compound/solutions/<category>/YYYY-MM-DD-<slug>.md` using the appropriate track template from `references/resolution-template.md`
 4. **Skip** overlap check and Phase 3 discoverability (suggest running `sp-compound:compound-refresh` later)
 
 Output:
 ```
-Learning captured (compact-safe mode): docs/solutions/<category>/<filename>.md
+Learning captured (compact-safe mode): sp-compound/solutions/<category>/<filename>.md
 
 Note: Created in compact-safe mode. For richer documentation (cross-references,
 overlap detection), re-run compound in a fresh session.
@@ -69,7 +69,7 @@ Dispatch a subagent that:
 2. Reads `references/solution-schema.yaml` for valid field values
 3. Generates YAML frontmatter (title, category, track, module, component, tags, resolution_type, related_files)
 4. Reads `references/yaml-schema.md` to determine the target directory
-5. Suggests filename: `docs/solutions/<category>/YYYY-MM-DD-<descriptive-slug>.md`
+5. Suggests filename: `sp-compound/solutions/<category>/YYYY-MM-DD-<descriptive-slug>.md`
 
 Returns: frontmatter YAML + suggested path. Does NOT write files.
 
@@ -96,9 +96,9 @@ Returns: structured text content. Does NOT write files.
 ### Agent 3: Related Docs Finder
 
 Dispatch a subagent that:
-1. Searches `docs/solutions/` using grep-first strategy:
+1. Searches `sp-compound/solutions/` using grep-first strategy:
    - Extract keywords from problem context (module names, technical terms, error messages)
-   - If category is clear, narrow search to `docs/solutions/<category>/`
+   - If category is clear, narrow search to `sp-compound/solutions/<category>/`
    - Use native content-search tool (e.g., Grep) to pre-filter candidates before reading: search frontmatter fields (`title:`, `tags:`, `module:`, `component:`) in parallel, case-insensitive
    - If >25 candidates: re-run with more specific patterns. If <3: broaden to full content search
    - Read only frontmatter (first 30 lines) to score relevance; fully read only strong/moderate matches
@@ -125,13 +125,13 @@ Collect all Phase 1 results. Check overlap score:
 | **Moderate** (1-2 match) | Create new document, add a note flagging potential future consolidation |
 | **Low/None** | Create new document normally |
 
-Write the document to `docs/solutions/<category>/YYYY-MM-DD-<slug>.md` using the template from `references/resolution-template.md`.
+Write the document to `sp-compound/solutions/<category>/YYYY-MM-DD-<slug>.md` using the template from `references/resolution-template.md`.
 
-### Creating docs/solutions/ Directory
+### Creating sp-compound/solutions/ Directory
 
-If `docs/solutions/` doesn't exist yet:
+If `sp-compound/solutions/` doesn't exist yet:
 1. Create the directory and the relevant category subdirectory
-2. Create `docs/solutions/README.md` with a brief description of the knowledge store
+2. Create `sp-compound/solutions/README.md` with a brief description of the knowledge store
 
 ## Phase 2.5: Selective Refresh Check
 
@@ -161,7 +161,7 @@ Do not invoke without an argument unless the user explicitly wants a broad sweep
 
 ## Phase 3: Discoverability Check
 
-Read and follow `references/discoverability-check.md`. Verify that project instruction files would lead agents to discover `docs/solutions/`.
+Read and follow `references/discoverability-check.md`. Verify that project instruction files would lead agents to discover `sp-compound/solutions/`.
 
 ## Common Mistakes
 
@@ -177,7 +177,7 @@ Read and follow `references/discoverability-check.md`. Verify that project instr
 Present the captured learning to the user:
 
 ```
-Learning captured: docs/solutions/<category>/<filename>.md
+Learning captured: sp-compound/solutions/<category>/<filename>.md
 
 Title: <title>
 Track: <bug|knowledge>
@@ -202,8 +202,8 @@ After displaying the output, present the "What's next?" options using the platfo
 - `sp-compound:compound-refresh` (Phase 2.5) when new learning contradicts existing docs
 
 **Consumed by:**
-- `sp-compound:plan` — learnings-researcher reads docs/solutions/ during Phase 1
-- `sp-compound:review` — learnings-researcher reads docs/solutions/ during Stage 3
+- `sp-compound:plan` — learnings-researcher reads sp-compound/solutions/ during Phase 1
+- `sp-compound:review` — learnings-researcher reads sp-compound/solutions/ during Stage 3
 - `sp-compound:brainstorm` — lightweight frontmatter grep during Phase 1
 
 **Reference files (read on demand, not bulk-loaded):**
