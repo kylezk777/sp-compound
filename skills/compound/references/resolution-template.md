@@ -1,6 +1,6 @@
 # Solution Document Template
 
-Use this template when creating new docs/solutions/ documents.
+Use this template when creating new sp-compound/solutions/ documents.
 
 ## Bug Track Template
 
@@ -97,8 +97,8 @@ date_created: YYYY-MM-DD
 status: current
 tags: [tag1, tag2]
 derived_from:
-  - docs/solutions/<category>/<learning1>.md
-  - docs/solutions/<category>/<learning2>.md
+  - sp-compound/solutions/<category>/<learning1>.md
+  - sp-compound/solutions/<category>/<learning2>.md
 ---
 
 ## Pattern
