@@ -152,6 +152,8 @@ If upcoming questions will involve visual content (mockups, layouts, diagrams, a
 
 If they decline, proceed with text-only brainstorming. If the topic has no visual component, skip this phase entirely.
 
+**If they accept:** Read `references/visual-companion.md` for the full server setup, HTML writing guide, event loop, and CSS classes. Start the server with `scripts/start-server.sh --project-dir <project-root>`.
+
 **Per-question decision (after acceptance):** Even after the user accepts, decide FOR EACH QUESTION whether to use the browser or terminal:
 - **Use browser** for: mockups, wireframes, layout comparisons, architecture diagrams, side-by-side visual designs
 - **Use terminal** for: requirements questions, conceptual choices, tradeoff lists, scope decisions
