@@ -57,7 +57,62 @@ If the requirements cover multiple independent subsystems, suggest breaking into
 ### 0.6 Classify Plan Depth
 - **Lightweight** (1-2 tasks): Small, bounded changes. Skip external research.
 - **Standard** (3-6 tasks): Normal features. Full research.
-- **Deep** (7+ tasks, cross-cutting): Complex work. Full research + confidence deepening.
+- **Deep** (7+ tasks, cross-cutting): Complex work. Full research + confidence deepening + **phased planning (see 0.7)**.
+
+Depth classification is preliminary here — it is confirmed after Phase 2.5 (File Structure), when the actual task count is known. If File Structure reveals 7+ logical task groups, reclassify to Deep and use phased planning even if the initial estimate was Standard.
+
+### 0.7 Phased Planning (Deep plans only)
+
+Generating 7+ tasks with complete code blocks in a single pass exhausts context, degrades quality toward the end, and introduces cross-task inconsistencies. Deep plans use phased planning: write an architecture skeleton first, then detail tasks batch-by-batch.
+
+**Phase A — Architecture Skeleton:**
+
+Write the plan header (Goal, Architecture, Tech Stack, Research Summary, Rejected Alternatives) plus:
+
+1. **Module Map** — every module/component, its responsibility, and which requirements (R1, R2...) it addresses
+2. **Interface Contracts** — complete type definitions for the types, function signatures, API shapes, or data schemas that modules **share with each other**. These are the cross-module seams that lock consistency. Write actual code for these — this is the one place where cross-module types are defined once. Module-internal types are NOT included here; each batch defines its own.
+3. **Execution Order** — which modules must be built first (foundation), which can be parallelized, which depend on others. Group into **batches** of 3-6 tasks each.
+4. **Per-batch summary** — 2-3 sentences describing scope and deliverables. No code blocks yet.
+
+Batch structure:
+- **Batch 1 is always Foundation**: shared types, data models, core utilities — implements the interface contracts defined above
+- **Batch 2-N are functional slices**: each delivers a complete, testable feature area
+- **Each batch: 3-6 tasks** (the Standard sweet spot for plan quality)
+- **Minimize cross-batch file edits**: later batches should avoid modifying files created by earlier batches. Cross-module interaction goes through the interface contracts.
+
+Write skeleton to disk immediately after completion.
+
+**Phase B — Batch Detail (serial, one batch at a time):**
+
+For each batch in execution order:
+1. Read the architecture skeleton (interface contracts are the consistency anchor)
+2. Read all previous batches' **summaries** (not full code blocks — see format below)
+3. Generate the current batch's tasks with full SP-format: complete code blocks, exact commands, expected output, execution notes, requirements trace — identical to the existing plan rules
+4. Write a **batch summary** after the tasks
+
+**Batch section heading format** (work uses this to detect batch boundaries):
+
+```markdown
+## Batch N: [Batch Name]
+```
+
+Example: `## Batch 1: Foundation`, `## Batch 2: User Management`. Always use h2 (`##`), always start with `Batch`, always include the batch number and a descriptive name after the colon.
+
+**Batch summary format:**
+
+```markdown
+### Batch N Summary
+**Files:** src/models/user.ts, src/models/types.ts, src/utils/crypto.ts
+**Key exports:** User class, CreateUserInput type, UserRole enum, hashPassword()
+```
+
+5. Append the batch (tasks + summary) to the plan file on disk
+
+The batch summary is lightweight (~10-15 lines) and carries forward to subsequent batches as context, replacing the need to hold previous batches' full code blocks in context.
+
+**When NOT to use phased planning:**
+- Lightweight and Standard plans — the overhead isn't justified
+- User explicitly says "write the full plan in one pass" — respect the choice, but warn about quality risks for 10+ tasks
 
 ## Phase 1: Research Layer
 
@@ -201,7 +256,11 @@ Before defining tasks, map out which files will be created or modified and what 
 
 This structure informs the task decomposition. Each task should produce self-contained changes that make sense independently.
 
+After mapping the file structure, confirm the depth classification from Phase 0.6: if the structure reveals 7+ logical task groups, reclassify to Deep and use phased planning (Phase 0.7).
+
 ## Phase 3: Write the Plan
+
+**Deep plans using phased planning (Phase 0.7):** In this phase, write only the Architecture Skeleton (Phase A). Then proceed to Phase B (batch-by-batch detail) serially — each batch generates full SP-format tasks and appends to the plan file. After all batches are detailed, proceed to Phase 4 (confidence deepening on skeleton + Batch 1) and Phase 5 (self-review).
 
 ### Plan Format (SP-style — preserved exactly)
 
@@ -221,6 +280,12 @@ This structure informs the task decomposition. Each task should produce self-con
 **Research Summary:** [2-3 sentences — what research found that shaped this plan]
 
 **Requirements:** [Path to requirements document, if exists]
+
+**Rejected Alternatives:**
+
+| Alternative | Why rejected |
+|-------------|-------------|
+| [Approach that was considered] | [Specific reason: perf, complexity, constraint, etc.] |
 
 ---
 ```
@@ -274,6 +339,7 @@ git commit -m "feat: descriptive message"
 ### Plan Rules
 
 - **No Placeholders:** Every step has actual content. No "TBD", "TODO", "implement later", "add tests for above", "add appropriate error handling", "handle edge cases", "similar to Task N" (repeat the code -- the reader may see tasks out of order), steps that describe what to do without showing how, or references to types/functions not defined in any task.
+- **Rejected Alternatives:** The plan header MUST include the Rejected Alternatives table. If only one approach was viable, state why the obvious alternative was ruled out. Implementers and reviewers need this context to avoid re-discovering the same dead ends.
 - **Complete code:** If a step changes code, show the code.
 - **Repo-relative file paths:** Always use repo-relative paths (e.g., `src/models/user.rb`), never absolute paths (e.g., `/Users/name/project/src/models/user.rb`). Absolute paths break portability across machines, worktrees, and teammates.
 - **Exact commands with expected output:** Always.
@@ -285,6 +351,8 @@ git commit -m "feat: descriptive message"
 ## Phase 4: Confidence Deepening (Standard/Deep plans only)
 
 After writing the plan, assess whether sections need strengthening. Skip for Lightweight plans unless they touch high-risk areas.
+
+**For phased Deep plans:** Apply confidence deepening to the **architecture skeleton** (module boundaries, interface contracts, rejected alternatives) and **Batch 1 (Foundation)** only. Later functional batches are Standard-sized and have work's three-role review as a quality backstop — deepening every batch would multiply token cost with diminishing returns.
 
 ### 4.1 Deepening Gate
 
@@ -315,6 +383,14 @@ Read and follow `references/deepening-workflow.md`:
 4. **Learnings integration:** If learnings-researcher found relevant docs, are they reflected?
 5. **Research grounding:** Are code blocks based on actual codebase patterns (from repo-research)?
 6. **Path check:** All file paths repo-relative? No absolute paths leaked in?
+7. **Rejected Alternatives:** Does the header include the Rejected Alternatives table with specific reasons?
+
+**Additional checks for phased Deep plans:**
+
+8. **Interface contract coverage:** Do the contracts cover all cross-module interactions? Any batch task imports a type not defined in the contracts?
+9. **Batch sizing:** Is every batch 3-6 tasks? Oversized batches defeat the purpose of phasing.
+10. **Cross-batch file edits:** Do later batches avoid modifying files created by earlier batches? If unavoidable, do the interface contracts pre-define the extension point?
+11. **Batch summaries:** Does every batch end with a summary (files + key exports)?
 
 Fix issues inline. No need to re-review.
 

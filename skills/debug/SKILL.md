@@ -193,24 +193,37 @@ You MUST complete each phase before proceeding to the next.
    - STOP
    - Count: How many fixes have you tried?
    - If < 3: Return to Phase 1, re-analyze with new information
-   - **If ≥ 3: STOP and question the architecture (step 5 below)**
-   - DON'T attempt Fix #4 without architectural discussion
+   - **If ≥ 3: STOP and switch to competing hypotheses (step 5 below)**
+   - DON'T attempt Fix #4 without running a discriminating probe first
 
-5. **If 3+ Fixes Failed: Question Architecture**
+5. **If 3+ Fixes Failed: Switch to Competing Hypotheses**
 
-   **Pattern indicating architectural problem:**
+   Three failed fixes means your mental model is wrong. Stop linear debugging and force divergent thinking:
+
+   **Step A: Generate at least 2 deliberately different hypotheses**
+
+   | Lane | Focus |
+   |------|-------|
+   | Code-path cause | The logic/implementation is wrong |
+   | Environment/config cause | The code is correct but context is wrong |
+   | Assumption mismatch | Your understanding of what *should* happen is wrong |
+
+   **Step B: For each hypothesis, identify a discriminating probe**
+
+   A discriminating probe is the single cheapest experiment that would confirm one hypothesis while ruling out another. Example: if Hypothesis A predicts the value is `null` at line 42 and Hypothesis B predicts it's stale, one `console.log` at line 42 distinguishes them.
+
+   **Step C: Run the discriminating probe BEFORE attempting Fix #4**
+
+   **Step D: If probes don't distinguish — question architecture**
+
+   Pattern indicating architectural problem:
    - Each fix reveals new shared state/coupling/problem in different place
    - Fixes require "massive refactoring" to implement
    - Each fix creates new symptoms elsewhere
 
-   **STOP and question fundamentals:**
-   - Is this pattern fundamentally sound?
-   - Are we "sticking with it through sheer inertia"?
-   - Should we refactor architecture vs. continue fixing symptoms?
+   **Discuss with your human partner before attempting more fixes.**
 
-   **Discuss with your human partner before attempting more fixes**
-
-   This is NOT a failed hypothesis - this is a wrong architecture.
+   This is NOT a failed hypothesis — this is a wrong architecture.
 
 ## Red Flags - STOP and Follow Process
 

@@ -34,6 +34,7 @@ Task tool (general-purpose or code-reviewer agent):
     **Testing:** Tests test real logic (not mocks)? Edge cases covered? Integration tests?
     **Requirements:** All plan requirements met? No scope creep?
     **File Organization:** Each file one responsibility? Following plan structure? Files not growing unwieldy?
+    **AI Code Smells:** Dead code (added but never called)? Needless abstractions (single-use wrappers, pass-through layers)? Duplicated logic that should be consolidated?
 
     ## Output Format
 

@@ -50,6 +50,12 @@ Check current git branch vs default branch, offer options:
 ### Step 3: Create Task List (skip for trivial)
 Break plan into actionable tasks from implementation units. Include dependency ordering and testing tasks.
 
+**Batched plan handling:** If the plan contains `## Batch` sections (h2 headings starting with "Batch", from phased planning), enforce batch boundaries as hard dependencies when building the task list:
+- Tasks **within** the same batch: set dependencies based on their logical relationships (same as non-batched plans)
+- Tasks in **Batch N+1**: blockedBy ALL tasks in Batch N
+
+This ensures serial execution respects batch order, and parallel execution only parallelizes within a single batch — never across batch boundaries. Non-batched plans are unaffected; this logic only activates when `## Batch` sections are detected.
+
 ### Step 4: Choose Execution Strategy
 
 | Strategy | When | How |
@@ -178,10 +184,16 @@ Before marking a task done, trace the impact of the change:
 
 ## Simplify as You Go
 
-After every 2-3 completed tasks (or at natural phase boundaries), review recently changed files for:
-- Duplicated patterns that can be consolidated
-- Shared helpers that can be extracted
-- Code reuse and efficiency improvements
+After every 2-3 completed tasks (or at natural phase boundaries like batch completions), review recently changed files against these AI code smell categories:
+
+| Smell | What to look for | Action |
+|-------|-----------------|--------|
+| **Dead code** | Functions/variables added but never called; unreachable branches; debug leftovers | Delete — verify tests still pass |
+| **Duplication** | Two blocks doing the same thing; copy-pasted logic with minor differences | Consolidate into shared helper |
+| **Needless abstraction** | Pass-through wrappers; single-use helper layers; speculative indirection | Inline — the caller is clearer without it |
+| **Boundary violation** | Wrong-layer imports; responsibilities placed in the wrong module | Move to correct layer |
+
+**Order:** delete first, then consolidate, then restructure. Re-run tests after each pass.
 
 Don't simplify after every single task — early patterns may look duplicated but diverge intentionally in later units.
 
