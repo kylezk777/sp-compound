@@ -1,6 +1,7 @@
 ---
 name: plan
 description: Use when you have requirements or a detailed idea for a multi-step task, before touching code. Researches codebase and knowledge store, then creates SP-format implementation plans with informed code.
+argument-hint: "[optional: feature description or requirements doc path]"
 ---
 
 # Writing Research-Backed Plans
@@ -9,13 +10,19 @@ description: Use when you have requirements or a detailed idea for a multi-step 
 
 Transform requirements into detailed implementation plans. Research the codebase and historical learnings FIRST, then write SP-format plans with complete code blocks, exact commands, and expected output.
 
+<feature_description> #$ARGUMENTS </feature_description>
+
+**If the feature description above is empty, ask the user:** "What would you like to plan? Describe the feature or task you have in mind."
+
+Do not proceed until there is a clear planning input.
+
 **Announce at start:** "I'm using the sp-compound plan skill to create the implementation plan."
 
 **Save plans to:** `.sp-compound/plans/YYYY-MM-DD-<feature-name>-plan.md`
 
 ## Interaction Method
 
-Use the platform's question tool when available (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise, present numbered options in chat and wait for the user's reply before proceeding. Ask one question at a time.
+Use `AskUserQuestion` when available. Otherwise, present numbered options in chat and wait for the user's reply before proceeding. Ask one question at a time.
 
 ## Core Principle
 
@@ -32,6 +39,8 @@ Search `.sp-compound/brainstorms/` for matching `*-requirements.md` files:
 Search `.sp-compound/plans/` for existing plans on this topic:
 - If found: ask whether to update or create new
 - If updating: preserve completed checkboxes, modify remaining tasks
+
+**Deepen intent:** If the user says "deepen the plan", "deepen my plan", or similar, identify the target plan in `.sp-compound/plans/`. If the plan appears complete (all major sections present, implementation tasks defined), short-circuit to Phase 4 (Confidence Deepening) in interactive mode -- present findings for user approval before integrating. Normal editing requests ("update the test scenarios", "add a task") follow the standard resume flow, not the deepen fast-path.
 
 ### 0.3 Classify Outstanding Questions
 From the requirements document's outstanding questions:
@@ -267,6 +276,15 @@ After mapping the file structure, confirm the depth classification from Phase 0.
 **Every plan MUST start with this header:**
 
 ```markdown
+---
+title: [Feature Name] Implementation Plan
+type: [feat|fix|refactor]
+status: active
+date: YYYY-MM-DD
+origin: .sp-compound/brainstorms/YYYY-MM-DD-<topic>-requirements.md  # include when planning from a requirements doc
+deepened: YYYY-MM-DD  # optional, set when confidence deepening substantively strengthens the plan
+---
+
 # [Feature Name] Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use sp-compound:work to implement this plan task-by-task.
@@ -281,11 +299,24 @@ After mapping the file structure, confirm the depth classification from Phase 0.
 
 **Requirements:** [Path to requirements document, if exists]
 
+**Scope Boundaries:**
+- [Explicit non-goal or exclusion]
+
+<!-- Optional: when some items are planned work for a separate PR or task, distinguish from true non-goals -->
+### Deferred to Separate Tasks
+- [Work that will be done separately]: [Where or when]
+
 **Rejected Alternatives:**
 
 | Alternative | Why rejected |
 |-------------|-------------|
 | [Approach that was considered] | [Specific reason: perf, complexity, constraint, etc.] |
+
+<!-- Optional: include when the plan creates 3+ new files in a new directory hierarchy.
+     Shows the expected output shape at a glance. Omit for plans that only modify existing files. -->
+## Output Structure
+
+    [directory tree showing new directories and files]
 
 ---
 ```
@@ -356,9 +387,14 @@ After writing the plan, assess whether sections need strengthening. Skip for Lig
 
 ### 4.1 Deepening Gate
 
+**Two deepening modes:**
+- **Auto mode** (default during plan generation): Runs without asking for approval. Sub-agent findings are synthesized directly into the plan.
+- **Interactive mode** (activated by the deepen fast-path in Phase 0.2): Findings are presented individually for user review before integration. The user can accept, reject, or discuss each finding.
+
 Quick-scan the plan for weak sections. A section is weak if it has thin rationale, missing tradeoffs, vague test scenarios, or gaps in risk treatment.
 
-- If **0 sections** score as candidates: skip deepening, proceed to Phase 5
+- **Thin local grounding override:** If Phase 1 triggered external research because local patterns were thin (fewer than 3 direct examples), always proceed to scoring regardless of how grounded the plan appears. When the plan was built on unfamiliar territory, claims about system behavior are more likely to be assumptions than verified facts.
+- If **0 sections** score as candidates (and the thin-grounding override does not apply): skip deepening, proceed to Phase 5
 - If **1+ sections** score: load `references/deepening-workflow.md` and follow the confidence scoring, targeted research dispatch, and synthesis steps
 
 ### 4.2 Execute Deepening
@@ -406,11 +442,14 @@ Plan complete and saved to `<path>`. Ready to execute?
 1. Start sp-compound:work (recommended)
 2. Open plan in editor for manual review
 3. Keep plan, I'll execute later
+4. Create issue in project tracker
 
 Which approach?
 ```
 
 **If option 1 chosen:** Invoke `sp-compound:work` with the plan path.
+
+**If option 4 chosen:** Detect the project tracker from `AGENTS.md` or `CLAUDE.md` (`project_tracker: github` or `project_tracker: linear`). For GitHub: `gh issue create --title "<type>: <title>" --body-file <plan_path>`. For Linear: `linear issue create --title "<title>" --description "$(cat <plan_path>)"`. If no tracker is configured, ask which they use and suggest adding it to `AGENTS.md`.
 
 ## Integration
 

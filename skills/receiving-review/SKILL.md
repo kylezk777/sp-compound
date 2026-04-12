@@ -161,6 +161,26 @@ State the correction factually and move on. No long apology needed.
 | Partial implementation | Clarify all items first |
 | Can't verify, proceed anyway | State limitation, ask for direction |
 
+## Real Examples
+
+**Performative Agreement (Bad):**
+```
+Reviewer: "Remove legacy code"
+WRONG: "You're absolutely right! Let me remove that..."
+```
+
+**Technical Verification (Good):**
+```
+Reviewer: "Remove legacy code"
+RIGHT: "Checking... build target is 10.15+, this API needs 13+. Need legacy for backward compat. Current impl has wrong bundle ID - fix it or drop pre-13 support?"
+```
+
+**YAGNI (Good):**
+```
+Reviewer: "Implement proper metrics tracking with database, date filters, CSV export"
+RIGHT: "Grepped codebase - nothing calls this endpoint. Remove it (YAGNI)? Or is there usage I'm missing?"
+```
+
 ## Reply Format
 
 When replying to feedback, quote the relevant part of the original comment for continuity:

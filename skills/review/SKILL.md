@@ -140,19 +140,21 @@ Launch all selected reviewers in parallel. Each receives:
 - Intent summary
 - PR metadata (title, body, URL) when reviewing a PR
 
-**Model tiering:** Reviewer sub-agents use mid-tier model (e.g., `sonnet` in Claude Code). Orchestrator stays on default (most capable) for intent discovery, selection, merge, and synthesis. If the platform has no model override, omit the parameter.
+Each reviewer returns JSON findings to the orchestrator.
+
+**Model tiering:** Reviewer sub-agents use mid-tier model (e.g., `sonnet` in Claude Code). Orchestrator stays on default (most capable) for intent discovery, selection, merge, and synthesis. If the platform has no model override mechanism or the available model names are unknown, omit the model parameter and let agents inherit the default.
 
 **Permission mode:** Omit the `mode` parameter on sub-agent dispatch so the user's configured permission settings apply.
 
-Reviewers are **read-only** — they may use `git diff`, `git blame`, `git log`, `gh pr view` but must NOT edit files, change branches, commit, push, or create PRs.
+Reviewers are **read-only** -- they may use `git diff`, `git blame`, `git log`, `gh pr view` but must NOT edit files, change branches, commit, push, or create PRs.
 
 **Protected artifacts:** Reviewers must NOT recommend deleting or cleaning up files under `.sp-compound/brainstorms/`, `.sp-compound/plans/`, `.sp-compound/solutions/`, or any knowledge store paths documented in project instruction files. These are durable knowledge assets, not dead code.
 
 ## Stage 5: Merge Pipeline
 
-Read and follow `references/merge-pipeline.md`:
+Read and follow `references/merge-pipeline.md`.
 
-1. **Validate** — check required fields (title, severity, file, line, confidence, autofix_class, owner, requires_verification, pre_existing) and value constraints. Drop malformed findings.
+1. **Validate** -- check required fields (title, severity, file, line, confidence, autofix_class, owner, requires_verification, pre_existing) and value constraints. Drop malformed findings.
 2. **Confidence gate** — suppress < 0.60 (P0 at 0.50+ survives)
 3. **Deduplicate** — fingerprint by file + line bucket +/-3 + title
 3.5. **Pre-existing detection** — git blame to separate pre-existing from new findings
@@ -165,7 +167,7 @@ Read and follow `references/merge-pipeline.md`:
 
 ## Stage 6: Report
 
-Output as markdown tables:
+Assemble the final report using **pipe-delimited markdown tables for findings** from the review output template (`references/review-output-template.md`). The table format is mandatory for finding rows in interactive mode -- do not render findings as freeform text blocks or horizontal-rule-separated prose.
 
 ### Header
 Scope, intent, mode, reviewer team.
@@ -211,32 +213,46 @@ Scope: <scope>
 Intent: <intent>
 Reviewers: <list>
 Verdict: <Ready to merge | Ready with fixes | Not ready>
+Artifact: .sp-compound/review-runs/<run-id>/
 
 Applied N safe_auto fixes.
 
-Gated-auto findings:
+Gated-auto findings (concrete fix, changes behavior/contracts):
+
 [P1][gated_auto -> downstream-resolver][needs-verification] File: <file:line> -- <title> (reviewer, confidence N)
+  Why: <why_it_matters>
+  Suggested fix: <suggested_fix or "none">
+  Evidence: <evidence[0]>
 
-Manual findings:
+Manual findings (actionable, needs handoff):
+
 [P1][manual -> downstream-resolver] File: <file:line> -- <title> (reviewer, confidence N)
+  Why: <why_it_matters>
+  Evidence: <evidence[0]>
 
-Advisory findings:
+Advisory findings (report-only):
+
 [P2][advisory -> human] File: <file:line> -- <title> (reviewer, confidence N)
+  Why: <why_it_matters>
 
 Pre-existing issues:
 [P2][gated_auto -> downstream-resolver] File: <file:line> -- <title> (reviewer, confidence N)
+  Why: <why_it_matters>
 
 Learnings & Past Solutions:
 - <learning>
 
 Coverage:
-- Suppressed: N findings below 0.60 confidence
+- Suppressed: N findings below 0.60 confidence (P0 at 0.50+ retained)
 - Untracked files excluded: <files>
+- Failed reviewers: <reviewer>
 
 Review complete
 ```
 
 Omit sections with zero items. End with "Review complete" as terminal signal.
+
+**Format verification:** Before delivering the report, verify the findings sections use pipe-delimited table rows (`| # | File | Issue | ... |`) not freeform text. If findings are rendered as prose blocks separated by horizontal rules or bullet points, reformat into tables.
 
 ### Fallback
 
@@ -251,6 +267,8 @@ Before delivering the report, verify:
 3. **Severity is calibrated.** Style nit is never P0. SQL injection is never P3.
 4. **Line numbers are accurate.** Verify each cited line against file content.
 5. **Findings don't duplicate linter output.** Focus on semantic issues, not what formatters catch.
+6. **Protected artifacts are respected.** Discard any findings that recommend deleting or gitignoring files in `.sp-compound/brainstorms/`, `.sp-compound/plans/`, or `.sp-compound/solutions/`.
+7. **Report format is correct.** Findings use pipe-delimited table rows, not freeform text blocks or horizontal-rule-separated prose.
 
 ## Post-Review: Fix & Handoff
 
@@ -303,8 +321,8 @@ Autofix, report-only, headless: stop after report and residual handoff. Never co
 - learnings-researcher agent (always)
 
 **Consumes:**
-- `references/findings-schema.md` — output format contract
-- `references/merge-pipeline.md` — merge rules
-- `references/diff-scope.md` — scope classification rules for reviewers
-- `references/resolve-base.sh` — base branch detection script
-- `.sp-compound/solutions/` — via learnings-researcher for historical context
+- `references/findings-schema.md` -- output format contract
+- `references/merge-pipeline.md` -- merge rules
+- `references/diff-scope.md` -- scope classification rules for reviewers
+- `references/resolve-base.sh` -- base branch detection script (fork-safe)
+- `.sp-compound/solutions/` -- via learnings-researcher for historical context

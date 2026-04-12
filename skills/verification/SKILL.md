@@ -108,10 +108,11 @@ Skip any step = lying, not verifying
 ## Why This Matters
 
 From real failure patterns:
-- "I don't believe you" - trust broken
+- your human partner said "I don't believe you" - trust broken
 - Undefined functions shipped - would crash
 - Missing requirements shipped - incomplete features
 - Time wasted on false completion → redirect → rework
+- Violates: "Honesty is a core value. If you lie, you'll be replaced."
 
 ## When To Apply
 

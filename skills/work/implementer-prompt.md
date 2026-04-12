@@ -51,7 +51,8 @@ Task tool (general-purpose):
       it as DONE_WITH_CONCERNS — don't split files on your own without plan guidance
     - If an existing file you're modifying is already large or tangled, work carefully
       and note it as a concern in your report
-    - In existing codebases, follow established patterns.
+    - In existing codebases, follow established patterns. Don't restructure things
+      outside your task scope.
 
     ## When You're in Over Your Head
 
@@ -87,4 +88,8 @@ Task tool (general-purpose):
     - Files changed
     - Self-review findings (if any)
     - Any issues or concerns
+
+    Use DONE_WITH_CONCERNS if you completed the work but have doubts about correctness.
+    Use BLOCKED if you cannot complete the task. Use NEEDS_CONTEXT if you need
+    information that wasn't provided. Never silently produce work you're unsure about.
 ```

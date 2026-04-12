@@ -47,9 +47,10 @@ description: "Use when [specific triggering conditions and symptoms]"
 ---
 ```
 
-**Frontmatter rules:**
+**Frontmatter rules:** (see [agentskills.io/specification](https://agentskills.io/specification) for all supported fields)
+- Max 1024 characters total for frontmatter
 - `name`: letters, numbers, hyphens only
-- `description`: starts with "Use when...", describes TRIGGERING CONDITIONS only. Never summarize the skill's workflow — agents may follow the description instead of reading the full skill.
+- `description`: starts with "Use when...", describes TRIGGERING CONDITIONS only. Never summarize the skill's workflow — agents may follow the description instead of reading the full skill. Keep under 500 characters.
 
 **Body structure:**
 1. Overview — core principle in 1-2 sentences
@@ -163,6 +164,27 @@ Make it easy for agents to self-check:
 - "This is different because..."
 ```
 
+## Anti-Patterns
+
+- **Narrative example**: "In session 2025-10-03, we found empty projectDir caused..." — too specific, not reusable
+- **Multi-language dilution**: example-js.js, example-py.py, example-go.go — mediocre quality, maintenance burden. One excellent example beats many mediocre ones.
+- **Code in flowcharts**: `step1 [label="import fs"]` — can't copy-paste, hard to read
+- **Generic labels**: helper1, step3, pattern4 — labels should have semantic meaning
+
+## Common Rationalizations for Skipping Testing
+
+| Excuse | Reality |
+|--------|---------|
+| "Skill is obviously clear" | Clear to you does not mean clear to other agents. Test it. |
+| "It's just a reference" | References can have gaps. Test retrieval. |
+| "Testing is overkill" | Untested skills have issues. Always. 15 min testing saves hours. |
+| "I'll test if problems emerge" | Problems = agents can't use skill. Test BEFORE deploying. |
+| "Too tedious to test" | Testing is less tedious than debugging bad skill in production. |
+| "I'm confident it's good" | Overconfidence guarantees issues. Test anyway. |
+| "No time to test" | Deploying untested skill wastes more time fixing it later. |
+
+**All of these mean: Test before deploying. No exceptions.**
+
 ## The Iron Law
 
 ```
@@ -197,6 +219,17 @@ Applies to NEW skills AND EDITS. Write skill before testing? Delete it. Start ov
 - [ ] Common mistakes section
 - [ ] No narrative storytelling
 - [ ] Supporting files only for tools or heavy reference
+
+## STOP: Before Moving to Next Skill
+
+After writing ANY skill, STOP and complete the testing process.
+
+Do NOT:
+- Create multiple skills in batch without testing each
+- Move to next skill before current one is verified
+- Skip testing because "batching is more efficient"
+
+Deploying untested skills = deploying untested code.
 
 ## Integration
 

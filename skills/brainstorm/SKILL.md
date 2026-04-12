@@ -11,6 +11,12 @@ Start by checking for existing work and project context, then ask questions one 
 
 All file references in generated documents must use repo-relative paths (e.g., `src/models/user.rb`), never absolute paths.
 
+## Interaction Rules
+
+1. **Ask one question at a time** — do not batch several unrelated questions into one message.
+2. **Prefer single-select multiple choice** — use single-select when choosing one direction, one priority, or one next step.
+3. **Use the platform's question tool when available** — prefer `AskUserQuestion` over freeform chat. If unavailable, present numbered options and wait for the user's reply before proceeding.
+
 <HARD-GATE>
 Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented requirements and the user has approved them. This applies to EVERY project regardless of perceived simplicity.
 </HARD-GATE>
@@ -65,7 +71,7 @@ If resuming: read document, summarize current state, identify outstanding questi
 Classify whether this is a software task before proceeding:
 
 - **Software** (continue to Scope Assessment below) -- references code, repos, APIs, databases, or asks to build/modify/debug/deploy software.
-- **Non-software brainstorming** -- BOTH: no software signals present AND the user wants to explore/decide/think through something in a non-software domain. Facilitate conversationally using diverse angles (inversion, constraint removal, analogy), separate generation from evaluation, converge by reflecting priorities back, and synthesize a summary. Do not follow the software phases below.
+- **Non-software brainstorming** -- BOTH: no software signals present AND the user wants to explore/decide/think through something in a non-software domain. Read `references/universal-brainstorming.md` and use those facilitation principles. Do not follow the software phases below.
 - **Neither** -- quick-help request, error message, factual question, single-step task. Respond directly, skip all brainstorming phases.
 
 ### Scope Assessment
@@ -117,11 +123,22 @@ Grep .sp-compound/solutions/**/*.md for module/component/tags matching the topic
 
 Before generating approaches, challenge the request to catch misframing. Match depth to scope:
 
-**Lightweight:** Is this solving the real user problem? Are we duplicating something that already covers this?
+**Lightweight:**
+- Is this solving the real user problem?
+- Are we duplicating something that already covers this?
+- Is there a clearly better framing with near-zero extra cost?
 
-**Standard:** Is this the right problem, or a proxy for a more important one? What user or business outcome actually matters? What happens if we do nothing? Is there a nearby framing that creates more value without more carrying cost?
+**Standard:**
+- Is this the right problem, or a proxy for a more important one?
+- What user or business outcome actually matters here?
+- What happens if we do nothing?
+- Is there a nearby framing that creates more user value without more carrying cost?
+- Given the current project state, user goal, and constraints, what is the single highest-leverage move right now?
+- Favor moves that compound value, reduce future carrying cost, or make the product meaningfully more useful
 
-**Deep:** Standard questions plus: What durable capability should this create in 6-12 months? Does this move the product toward that, or is it only a local patch?
+**Deep:** Standard questions plus:
+- What durable capability should this create in 6-12 months?
+- Does this move the product toward that, or is it only a local patch?
 
 Use the result to sharpen the conversation, not to override the user's intent.
 
@@ -158,6 +175,7 @@ A question about a UI topic is not automatically a visual question. "What does p
 
 - Propose 2-3 different approaches with trade-offs
 - Use at least one non-obvious angle -- inversion (what if we did the opposite?), constraint removal (what if X weren't a limitation?), or analogy from another domain
+- When useful, include one deliberately higher-upside alternative: what adjacent addition or reframing would most increase usefulness or durability without disproportionate carrying cost? Present it as a challenger option alongside the baseline, not as the default. Omit when the work is already over-scoped or the baseline is clearly right.
 - Present all approaches first, then state your recommendation -- leading with a recommendation before the user sees alternatives anchors the conversation prematurely
 - Present conversationally, not as a formal comparison matrix
 
@@ -165,49 +183,13 @@ A question about a UI topic is not automatically a visual question. "What does p
 
 Present requirements grouped by logical theme. This document answers WHAT to build, NOT HOW.
 
-**Requirements document structure:**
-
-```markdown
-# <Topic> Requirements
-
-## Problem Statement
-[What problem are we solving? Why does it matter?]
-
-## Success Criteria
-[How do we know when this is done? Measurable where possible.]
-
-## Requirements
-
-### <Theme 1>
-- **R1:** [Requirement with stable ID]
-- **R2:** [Requirement with stable ID]
-
-### <Theme 2>
-- **R3:** [Requirement with stable ID]
-- **R4:** [Requirement with stable ID]
-
-## Scope Boundaries
-[What is explicitly OUT of scope]
-
-## Outstanding Questions
-
-### Resolve Before Planning
-[Product decisions that block planning]
-
-### Deferred to Planning
-[Technical/research questions better answered during planning]
-- [Needs research] <question>
-- [Technical] <question>
-
-## Historical Context
-[If learnings were found in .sp-compound/solutions/, summarize relevance here]
-```
+Read `references/requirements-capture.md` for the document template, formatting rules, visual aid guidance, and completeness checks.
 
 **Key rules:**
-- Stable requirement IDs (R1, R2, R3...) — planning will reference these
+- Stable requirement IDs (R1, R2, R3...) -- planning will reference these
 - Group by logical theme, not discussion order
-- WHAT not HOW — no architecture, no technology choices, no implementation details
-- Outstanding questions split explicitly into blocking vs deferred
+- WHAT not HOW -- no architecture, no technology choices, no implementation details
+- Outstanding questions split explicitly into blocking vs deferred, tagged with `[Affects RN]`, `[User decision]`, `[Technical]`, `[Needs research]`
 
 Ask after each theme whether it looks right. Be ready to revise.
 
@@ -223,6 +205,10 @@ After writing, check with fresh eyes:
 3. **Scope check:** Focused enough for a single implementation plan?
 4. **Ambiguity check:** Could any requirement be interpreted two ways? Pick one.
 5. **WHAT not HOW check:** Does any requirement specify implementation details? Remove them.
+6. **Planning readiness:** What would `sp-compound:plan` still have to invent if this brainstorm ended now?
+7. **Scope dependency:** Do any requirements depend on something claimed to be out of scope?
+8. **Low-cost value:** Is there a low-cost change that would make this materially more useful?
+9. **Visual aid check:** Would a diagram or table help a reader grasp the requirements faster than prose alone?
 
 Fix issues inline. No need to re-review.
 
@@ -234,52 +220,15 @@ Wait for user response. If changes requested, make them and re-run self-review. 
 
 ## Phase 6: Transition to Planning
 
-### Blocking Questions Gate
-
-If `Resolve Before Planning` in the requirements document contains any items, do NOT proceed to planning. Instead:
-- Ask the blocking questions now, one at a time
-- If the user wants to proceed anyway, convert each remaining item into an explicit decision, assumption, or `Deferred to Planning` question first
-- If the user wants to pause, present the brainstorm as paused/blocked
-
-### Handoff Options
-
-Present next steps:
-- **Proceed to planning (Recommended)** -- invoke sp-compound:plan with the requirements doc path
-- **Proceed directly to work** -- only when scope is lightweight, success criteria are clear, scope boundaries are clear, and no technical questions remain. Invoke sp-compound:work.
-- **Ask more questions** -- return to Phase 2 Q&A
-- **Done for now** -- return later
+Read `references/handoff.md` for the option logic, dispatch instructions, and closing summary format.
 
 Do NOT invoke any skill other than sp-compound:plan or sp-compound:work.
-
-### Closing Summary
-
-When the workflow ends or hands off, display:
-
-```
-Brainstorm complete!
-Requirements doc: <path>  (if created)
-Key decisions:
-- [Decision 1]
-- [Decision 2]
-Recommended next step: sp-compound:plan
-```
-
-If paused with blocking questions remaining:
-
-```
-Brainstorm paused.
-Requirements doc: <path>  (if created)
-Planning is blocked by:
-- [Blocking question 1]
-- [Blocking question 2]
-Resume brainstorm to resolve these before planning.
-```
 
 ## Key Principles
 
 - **One question at a time** — don't overwhelm
 - **Multiple choice preferred** — easier to answer when possible
-- **YAGNI ruthlessly** — remove unnecessary requirements
+- **YAGNI to carrying cost, not coding effort** — remove speculative complexity, but low-cost polish or delight is worth including when its ongoing cost is small
 - **Explore alternatives** — always propose 2-3 approaches
 - **WHAT not HOW** — requirements, not design. Leave HOW for planning.
 - **Incremental validation** — present requirements, get approval before writing

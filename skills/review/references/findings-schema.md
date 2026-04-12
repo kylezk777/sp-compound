@@ -1,23 +1,26 @@
 # Review Findings Schema
 
-Every reviewer agent returns findings in this JSON format:
+Every reviewer agent produces findings in this JSON format.
+
+## Schema
 
 ```json
 {
   "reviewer": "reviewer-name",
   "findings": [
     {
+      "title": "Short description (< 80 chars)",
       "severity": "P0|P1|P2|P3",
-      "confidence": 0.0-1.0,
       "file": "path/to/file.ext",
       "line": 42,
-      "title": "Short description (< 80 chars)",
-      "detail": "Full explanation: what's wrong, why it matters, how to fix",
+      "confidence": 0.0-1.0,
       "autofix_class": "safe_auto|gated_auto|manual|advisory",
       "owner": "review-fixer|downstream-resolver|human|release",
       "requires_verification": false,
-      "suggested_fix": "Concrete minimal fix or null",
-      "pre_existing": false
+      "pre_existing": false,
+      "why_it_matters": "Impact and failure mode -- not 'what is wrong' but 'what breaks'",
+      "evidence": ["Code-grounded evidence: snippets, line references, or pattern descriptions"],
+      "suggested_fix": "Concrete minimal fix or null"
     }
   ],
   "residual_risks": ["Description of risk that remains even after fixing findings"],
@@ -29,9 +32,9 @@ Every reviewer agent returns findings in this JSON format:
 
 **Top-level:** reviewer (string), findings (array), residual_risks (array), testing_gaps (array).
 
-**Per-finding:** title, severity, file, line, confidence, autofix_class, owner, requires_verification, pre_existing.
+**Per-finding:** title, severity, file, line, confidence, autofix_class, owner, requires_verification, pre_existing, why_it_matters, evidence (array, at least 1 item).
 
-**Optional per-finding:** suggested_fix (include when fix is obvious and correct; a bad suggestion is worse than none), detail (full explanation).
+**Optional per-finding:** suggested_fix (include when fix is obvious and correct; a bad suggestion is worse than none).
 
 ## Value Constraints
 
@@ -55,7 +58,7 @@ Every reviewer agent returns findings in this JSON format:
 
 | Class | Default Owner | Description |
 |-------|---------------|-------------|
-| **safe_auto** | review-fixer | Local, deterministic fix. Apply automatically. Examples: extract duplicated helper, add missing nil check, fix off-by-one, add missing test. |
+| **safe_auto** | review-fixer | Local, deterministic fix. Apply automatically. Examples: extract duplicated helper, add missing nil check, fix off-by-one, add missing test. Do not default to advisory when a concrete safe fix exists. |
 | **gated_auto** | downstream-resolver or human | Concrete fix exists but changes behavior/contracts. Needs approval. Examples: add auth to unprotected endpoint, change API response shape. |
 | **manual** | downstream-resolver or human | Actionable but requires design judgment. Examples: redesign data model, add pagination strategy. |
 | **advisory** | human or release | Report-only. No action expected. Examples: design asymmetry, residual risk, deployment notes. |

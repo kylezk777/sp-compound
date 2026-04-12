@@ -13,6 +13,8 @@ A section is a deepening candidate if it scores **2+ total** (or **1+** in a hig
 
 Select **top 2-5 sections** by score. For Lightweight plans (high-risk exception), cap at 1-2.
 
+If the plan already has a `deepened:` date, prefer sections that have not yet been substantially strengthened when scores are comparable. Revisit an already-deepened section only when it still scores clearly higher than alternatives.
+
 ## Section Checklists
 
 **Requirements Trace**
@@ -73,10 +75,21 @@ For each selected section:
 4. Each agent receives: plan summary, exact section text, why it was selected, specific question to answer
 5. Each agent returns: findings that improve planning quality, stronger rationale/verification/references. No implementation code.
 
+## Interactive Finding Review (Interactive Mode Only)
+
+Skip this step in auto mode -- proceed directly to Synthesize and Strengthen.
+
+In interactive mode (triggered by the deepen fast-path), present each agent's findings to the user before integration:
+1. Summarize the agent and its target section
+2. Present the key findings concisely with enough context to evaluate
+3. Ask: **Accept** (integrate), **Reject** (discard), or **Discuss** (talk through before deciding)
+
+If the user chose "Discuss", engage briefly then re-ask with accept/reject only. Carry only accepted findings forward to synthesis. If no findings were accepted, report "No findings accepted -- plan unchanged" and skip synthesis.
+
 ## Synthesize and Strengthen
 
-After research returns:
-1. Integrate findings into the plan's weak sections
+After research returns (or after interactive review in interactive mode):
+1. Integrate findings into the plan's weak sections (in interactive mode, only accepted findings)
 2. Strengthen rationale, add references, improve test scenarios, fill gaps
 3. Do NOT rewrite sections that scored well — only strengthen the weak ones
 4. Add `deepened: YYYY-MM-DD` to plan YAML frontmatter

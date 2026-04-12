@@ -68,9 +68,23 @@ No .gitignore verification needed — outside project entirely.
 1. **Detect project name:** `project=$(basename "$(git rev-parse --show-toplevel)")`
 2. **Create worktree:** `git worktree add "$path" -b "$BRANCH_NAME"`
 3. **Copy environment files:** Copy `.env`, `.env.local`, `.env.test`, and similar dotenv files from the main repo to the worktree. These are gitignored and won't exist in the new worktree without explicit copying.
-4. **Run project setup:** Auto-detect from package.json/Cargo.toml/go.mod/requirements.txt/pyproject.toml
-5. **Verify clean baseline:** Run tests. If fail: report + ask. If pass: report ready.
-6. **Report location:** Full path, test count, ready status.
+4. **Trust dev tool configs:** If mise or direnv are installed and config files exist in the worktree, trust them so hooks and scripts work immediately. Only auto-trust configs unchanged from the base branch. Flag modified configs for manual review.
+5. **Run project setup:** Auto-detect from package.json/Cargo.toml/go.mod/requirements.txt/pyproject.toml
+6. **Verify clean baseline:** Run tests. If fail: report + ask. If pass: report ready.
+7. **Report location:** Full path, test count, ready status.
+
+## Quick Reference
+
+| Situation | Action |
+|-----------|--------|
+| `.worktrees/` exists | Use it (verify ignored) |
+| `worktrees/` exists | Use it (verify ignored) |
+| Both exist | Use `.worktrees/` |
+| Neither exists | Check CLAUDE.md -> Ask user |
+| Directory not ignored | Add to .gitignore + commit |
+| Tests fail during baseline | Report failures + ask |
+| No package.json/Cargo.toml | Skip dependency install |
+| mise/direnv config modified | Flag for manual review |
 
 ## Red Flags
 

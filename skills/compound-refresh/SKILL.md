@@ -1,6 +1,7 @@
 ---
 name: compound-refresh
 description: Use to maintain .sp-compound/solutions/ knowledge store quality. Reviews existing learnings against the current codebase, then updates, consolidates, replaces, or deletes stale documents. Supports interactive and autofix modes.
+disable-model-invocation: true
 ---
 
 # Compound Refresh: Maintain the Knowledge Store
@@ -206,7 +207,7 @@ Two subagent roles:
 1. **Investigation subagents** — read-only. Return: file path, evidence, recommended action, confidence. Can run in parallel when artifacts are independent.
 2. **Replacement subagents** — write a single new learning. Run one at a time, sequentially (each may read significant code).
 
-When spawning subagents, include: "Use native file search and read tools (Glob, Grep, Read) for all investigation. Do NOT use shell commands for file operations."
+When spawning subagents, include: "Use native file search and read tools (Glob, Grep, Read) for all investigation. Do NOT use shell commands (ls, find, cat, grep, test, bash) for file operations."
 
 ## Phase 2: Classify Action
 

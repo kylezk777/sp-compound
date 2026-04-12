@@ -4,6 +4,8 @@
 
 **Core principle:** Test what the code does, not what the mocks do.
 
+**Following strict TDD prevents these anti-patterns.**
+
 ## The Iron Laws
 
 ```
@@ -28,6 +30,8 @@ test('renders sidebar'):
   expect(getByRole('navigation')).exists     # Test real element
 ```
 
+**Why wrong:** You're verifying the mock works, not that the component works. Test passes when mock is present, fails when it's not. Tells you nothing about real behavior.
+
 **Gate:** Before asserting on any mock element, ask: "Am I testing real behavior or mock existence?" If mock existence — delete the assertion or unmock.
 
 ## Anti-Pattern 2: Test-Only Methods in Production
@@ -47,6 +51,8 @@ def cleanup_session(session):   # In test_utils
   if workspace:
     workspace_manager.destroy(workspace.id)
 ```
+
+**Why wrong:** Production class polluted with test-only code. Dangerous if accidentally called in production. Violates YAGNI and separation of concerns.
 
 **Gate:** Before adding any method to production class, ask: "Is this only used by tests?" If yes — put it in test utilities.
 
@@ -68,10 +74,14 @@ test('detects duplicate server'):
   addServer(config)         # Duplicate detected
 ```
 
+**Why wrong:** Mocked method had side effect test depended on. Over-mocking to "be safe" breaks actual behavior.
+
 **Gate:** Before mocking:
 1. What side effects does the real method have?
 2. Does this test depend on any of those side effects?
 3. If yes — mock at a lower level, preserving the side effects the test needs.
+
+If unsure what test depends on: run test with real implementation FIRST, observe what actually needs to happen, THEN add minimal mocking.
 
 ## Anti-Pattern 4: Incomplete Mocks
 
@@ -92,6 +102,8 @@ mock_response = {
   'metadata': {'request_id': 'req-789', 'timestamp': 1234567890}
 }
 ```
+
+**Why wrong:** Partial mocks hide structural assumptions. Downstream code may depend on fields you didn't include. Tests pass but integration fails.
 
 **Gate:** Before creating mock responses, check: "What fields does the real API response contain?" Include ALL fields the system might consume downstream.
 
@@ -115,6 +127,15 @@ Testing is part of implementation. TDD prevents this entirely:
 
 **Consider:** Integration tests with real components are often simpler than complex mocks.
 
+## TDD Prevents These Anti-Patterns
+
+1. **Write test first** -- Forces you to think about what you're actually testing
+2. **Watch it fail** -- Confirms test tests real behavior, not mocks
+3. **Minimal implementation** -- No test-only methods creep in
+4. **Real dependencies** -- You see what the test actually needs before mocking
+
+**If you're testing mock behavior, you violated TDD** - you added mocks without watching test fail against real code first.
+
 ## Quick Reference
 
 | Anti-Pattern | Fix |
@@ -134,3 +155,9 @@ Testing is part of implementation. TDD prevents this entirely:
 - Test fails when you remove mock
 - Can't explain why mock is needed
 - Mocking "just to be safe"
+
+## The Bottom Line
+
+**Mocks are tools to isolate, not things to test.**
+
+If TDD reveals you're testing mock behavior, you've gone wrong. Test real behavior or question why you're mocking at all.

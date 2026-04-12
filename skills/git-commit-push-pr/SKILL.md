@@ -24,11 +24,24 @@ git rev-parse --abbrev-ref origin/HEAD 2>/dev/null || echo 'UNRESOLVED'
 gh pr view --json url,title,state 2>/dev/null || echo 'NO_OPEN_PR'
 ```
 
-**Edge cases:**
-- Detached HEAD: ask whether to create a feature branch
-- On default branch with changes: ask whether to create a feature branch (don't push directly)
-- Clean working tree: check for unpushed commits or missing PR before stopping
-- Unpushed commits exist: skip commit, go to push
+**Edge cases — Detached HEAD:**
+Ask whether to create a feature branch. If yes, derive a name from the change content and `git checkout -b <branch-name>`. If no, stop.
+
+**Edge cases — On default branch with changes:**
+Ask whether to create a feature branch (don't push the default branch directly).
+
+**Edge cases — Clean working tree:**
+When git status shows no staged, modified, or untracked files, determine the next action:
+1. Run `git rev-parse --abbrev-ref --symbolic-full-name @{u}` to check upstream.
+2. If upstream exists, run `git log <upstream>..HEAD --oneline` for unpushed commits.
+
+Decision tree:
+- **On default branch, no unpushed commits, no open PR**: nothing to do. Stop.
+- **On default branch with unpushed commits**: ask whether to create a feature branch first.
+- **Feature branch, no upstream configured** (never pushed): skip commit, go to push.
+- **Feature branch, unpushed commits exist**: skip commit, go to push.
+- **Feature branch, all pushed, no open PR**: skip commit and push, go to PR description.
+- **Feature branch, all pushed, open PR exists**: report up to date. Stop.
 
 ## Step 2: Determine Conventions
 
@@ -57,18 +70,28 @@ git push -u origin HEAD
 
 ## Step 5: Write PR Description
 
-### Detect base branch
+### Detect base branch and remote
+
+Resolve the base branch and the remote that hosts it. In fork-based PRs, the base may correspond to a remote other than `origin` (commonly `upstream`).
 
 Fallback chain (stop at first success):
-1. PR metadata: `gh pr view --json baseRefName,url`
-2. Remote default: `git rev-parse --abbrev-ref origin/HEAD`
-3. GitHub API: `gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'`
-4. Common names: try main, master, develop, trunk
+1. **PR metadata** (if open PR exists): `gh pr view --json baseRefName,url`. Extract `baseRefName`. Match the PR URL's `owner/repo` against `git remote -v` to find the correct remote. Fall back to `origin` if no match.
+2. **Remote default**: `git rev-parse --abbrev-ref origin/HEAD` — strip `origin/` prefix. Use `origin`.
+3. **GitHub API**: `gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'`. Use `origin`.
+4. **Common names**: try main, master, develop, trunk via `git rev-parse --verify origin/<candidate>`.
+
+If none resolve, ask the user to specify the target branch.
 
 ### Gather branch scope
 
+Verify the remote-tracking ref exists and fetch if needed:
 ```bash
-MERGE_BASE=$(git merge-base <remote>/<base> HEAD) && git log --oneline $MERGE_BASE..HEAD && git diff $MERGE_BASE...HEAD
+git rev-parse --verify <base-remote>/<base-branch> 2>/dev/null || git fetch --no-tags <base-remote> <base-branch>
+```
+
+Then gather the merge base, commit list, and full diff:
+```bash
+MERGE_BASE=$(git merge-base <base-remote>/<base-branch> HEAD) && echo "MERGE_BASE=$MERGE_BASE" && echo '=== COMMITS ===' && git log --oneline $MERGE_BASE..HEAD && echo '=== DIFF ===' && git diff $MERGE_BASE...HEAD
 ```
 
 ### Classify commits
@@ -77,6 +100,16 @@ MERGE_BASE=$(git merge-base <remote>/<base> HEAD) && git log --oneline $MERGE_BA
 - **Fix-up commits** — code review fixes, lint, style, typos. Invisible to reader.
 
 Only feature commits inform the description.
+
+### Frame the narrative before sizing
+
+After classifying commits, articulate the PR's narrative frame:
+
+1. **Before**: What was broken, limited, or impossible? (One sentence.)
+2. **After**: What's now possible or improved? (One sentence.)
+3. **Scope rationale** (only if the PR touches 2+ separable-looking concerns): Why do these ship together? (One sentence.)
+
+This frame becomes the opening of the description. For small+simple PRs, the "after" sentence alone may be the entire description.
 
 ### Size the description
 
@@ -88,6 +121,14 @@ Only feature commits inform the description.
 | Large or architecturally significant | Full narrative: problem context, approach, key decisions, migration/rollback notes. |
 | Performance improvement | Include before/after measurements in a markdown table. |
 
+### Writing Voice
+
+If the user has documented style preferences (in CLAUDE.md, project instructions, or prior feedback), follow those. Otherwise:
+- Active voice throughout. Vary sentence length deliberately.
+- No filler phrases: "it's worth noting", "importantly", "essentially", "in order to".
+- Use digits for numbers ("3 files"), not words ("three files").
+- Plain English. Technical jargon is fine when it's the clearest term; avoid business jargon.
+
 ### Writing Principles
 
 - **Lead with value**: first sentence = *why this PR exists*, not what files changed
@@ -97,7 +138,8 @@ Only feature commits inform the description.
 - **No empty sections**: omit sections that don't apply
 - **Test plan only when non-obvious**: edge cases the reviewer might miss, specific setup needed
 - **No `#` prefix on list items**: GitHub auto-links `#1` as an issue reference
-- **Visual aids**: include Mermaid diagrams or ASCII art only when structurally complex (3+ interacting components, multi-step workflows). Skip for trivial changes.
+- **No orphaned opening paragraphs**: If the description uses `##` headings anywhere, the opening summary must also be under a heading (e.g., `## Summary`). A bare paragraph followed by titled sections looks like a missing heading.
+- **Visual aids**: include Mermaid diagrams or ASCII art only when structurally complex (3+ interacting components, multi-step workflows). Skip for trivial changes. Use `TB` direction for Mermaid so diagrams stay narrow. Prose is authoritative when diagram and text disagree.
 
 ## Step 6: Create or Update PR
 

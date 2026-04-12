@@ -7,13 +7,21 @@ description: "Systematically reproduce and investigate a bug from a GitHub issue
 
 Hypothesis-driven workflow for reproducing and investigating bugs from issue reports. Framework-agnostic.
 
+## Core Principles
+
+1. **Investigate before fixing.** Do not propose a fix until you can explain the full causal chain from trigger to symptom with no gaps. "Somehow X leads to Y" is a gap.
+2. **Predictions for uncertain links.** When the causal chain has uncertain or non-obvious links, form a prediction — something in a different code path or scenario that must also be true. If the prediction is wrong but a fix "works," you found a symptom, not the cause.
+3. **One change at a time.** Test one hypothesis, change one thing. If changing multiple things to "see if it helps," stop — that is shotgun debugging.
+
 ## Phase 1: Understand the Issue
 
-If no issue number/URL provided, ask the user for one (using the platform's question tool — `AskUserQuestion` in Claude Code, `request_user_input` in Codex, or present a prompt and wait).
+If no issue number/URL provided, ask the user for one (using the platform's question tool — `AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini — or present a prompt and wait).
 
-```bash
-gh issue view <number-or-url> --json title,body,comments,labels,assignees
-```
+**If the input references an issue tracker**, fetch it:
+- GitHub (`#123`, `org/repo#123`, github.com URL): `gh issue view <number-or-url> --json title,body,comments,labels,assignees`
+- Other trackers (Linear, Jira, etc.): attempt to fetch using available MCP tools or by fetching the URL content. If fetch fails, ask the user to paste the relevant issue content.
+
+**Prior-attempt awareness:** If the user indicates prior failed attempts ("I've been trying", "keeps failing", "stuck"), ask what they have already tried before investigating.
 
 Extract from the issue:
 - **Reported symptoms** — error messages, wrong output, crashes
@@ -37,12 +45,14 @@ Use native content-search (e.g., Grep) for:
 
 ### Form hypotheses
 
-For each hypothesis, identify:
-- **What** might be wrong
-- **Where** in the codebase (specific files)
-- **Why** it would produce the reported symptoms
+Before forming hypotheses, check for these anti-patterns: proposing a fix before explaining the cause, reaching for another attempt without new information, certainty without evidence ("I know what this is" before reading code), and minimizing scope ("it's probably just...").
 
-Rank by likelihood. Investigate most likely first.
+For each hypothesis, state:
+- **What** is wrong and **where** (file:line)
+- **Causal chain**: how the trigger leads to the observed symptom, step by step
+- **Prediction** (for uncertain links): something in a different code path that must also be true if this hypothesis is correct. When the chain is obvious (missing import, clear null ref), the chain itself is sufficient — no prediction needed.
+
+Rank by likelihood. Before forming a new hypothesis, review what has already been ruled out and why.
 
 ## Phase 3: Reproduce
 
@@ -73,9 +83,10 @@ For bugs needing specific data, user roles, or external service state:
 ### If reproduction fails
 
 1. Try remaining hypotheses
-2. Check for environment-specific factors
-3. Search for recent changes: `git log --oneline -20 -- <affected_files>`
-4. Document what was tried and what conditions might be missing
+2. **Intermittent bugs**: run the scenario in a loop to establish reproduction rate. Add targeted logging at suspected failure points. Systematically eliminate variables (different data, serial vs parallel, with/without network).
+3. Check for environment-specific factors — differences between environments IS the investigation
+4. Search for recent changes: `git log --oneline -20 -- <affected_files>`
+5. Document what was tried and what conditions might be missing
 
 ## Phase 4: Investigate Root Cause
 
@@ -91,9 +102,24 @@ Depending on what the project has:
 ### Trace the code path
 
 1. Read relevant source files from the entry point identified in Phase 2
-2. Identify where behavior diverges from expectations
+2. Follow the execution path backward from the error: "where did this value come from?" and "who called this?" — do not stop at the first function that looks wrong; the root cause is where bad state originates, not where it is first observed
 3. Check edge cases: nil/null, empty collections, boundary conditions, race conditions
 4. Look for recent changes: `git log --oneline -10 -- <file>`
+
+### Causal chain gate
+
+Do not proceed to Phase 5 until you can explain the full causal chain from trigger to symptom with no gaps. The user can explicitly authorize proceeding with the best-available hypothesis if investigation is stuck.
+
+### Smart escalation
+
+If 2-3 hypotheses are exhausted without confirmation, diagnose why:
+
+| Pattern | Diagnosis | Next move |
+|---------|-----------|-----------|
+| Hypotheses point to different subsystems | Architecture/design problem | Present findings, suggest brainstorm |
+| Evidence contradicts itself | Wrong mental model | Re-read code path without assumptions |
+| Works locally, fails in CI/prod | Environment problem | Systematically compare environments |
+| Fix works but prediction was wrong | Symptom fix, not root cause | Keep investigating |
 
 ## Phase 5: Document and Present
 

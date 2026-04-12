@@ -32,6 +32,8 @@ Scan for affected files and existing tests, then assess complexity:
 ### Step 1: Read Plan and Clarify (skip for bare prompts)
 Read the plan fully. It's a decision artifact, not an execution script. Check:
 - Implementation Units and their execution notes
+- `Patterns to follow` fields on each unit (specific files or conventions to mirror)
+- `Verification` fields on each unit (the primary "done" signal)
 - Deferred unknowns
 - Scope boundaries
 
@@ -49,6 +51,9 @@ Check current git branch vs default branch, offer options:
 
 ### Step 3: Create Task List (skip for trivial)
 Break plan into actionable tasks from implementation units. Include dependency ordering and testing tasks.
+- Carry each unit's `Execution note` into the task (test-first, characterization-first, pragmatic)
+- Use each unit's `Verification` field as the primary "done" signal for that task
+- Read each unit's `Patterns to follow` before implementing
 
 **Batched plan handling:** If the plan contains `## Batch` sections (h2 headings starting with "Batch", from phased planning), enforce batch boundaries as hard dependencies when building the task list:
 - Tasks **within** the same batch: set dependencies based on their logical relationships (same as non-batched plans)
@@ -78,6 +83,7 @@ Use `./implementer-prompt.md` template. Provide:
 - Scene-setting context (where this fits, what was built before)
 - Working directory
 - Execution note (test-first / characterization-first / pragmatic)
+- Instruction to check whether test scenarios cover all applicable categories (happy paths, edge cases, error paths, integration) and supplement gaps before writing tests
 
 **Permission mode:** Omit the `mode` parameter when dispatching subagents so the user's configured permission settings apply. Do not pass `mode: "auto"` — it overrides user-level settings.
 
@@ -177,6 +183,7 @@ Before marking a task done, trace the impact of the change:
 ## Incremental Commits
 
 - Commit when a logical unit is complete AND tests pass
+- **Heuristic:** "Can I write a commit message that describes a complete, valuable change? If yes, commit. If the message would be 'WIP' or 'partial X', wait."
 - Don't commit WIP or partial work
 - Conventional commit messages (feat:, fix:, refactor:, test:)
 - Stage only relevant files (not `git add .`)
@@ -204,6 +211,7 @@ For every change that ships, include a brief monitoring section in the PR descri
 - **Metrics/dashboards:** what to watch (latency, error rate, throughput)
 - **Healthy signals:** what normal looks like after deploy
 - **Rollback trigger:** what warrants an immediate rollback
+- **Validation window and owner:** how long to monitor and who is responsible
 
 Skip for changes that have no runtime impact (docs, comments, dev tooling).
 
