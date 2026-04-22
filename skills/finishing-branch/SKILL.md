@@ -95,6 +95,14 @@ Applies only when user chose Option 1 (Merge locally) or Option 2 (Push and crea
 
 Run these sub-steps **before** the state-changing git operation of Step 4 (`git merge` for Option 1; `git push` / `gh pr create` for Option 2). For Option 1: run this block after the local test verification on the feature branch but before `git checkout <base-branch>`. For Option 2: run this block before `git push -u origin <feature-branch>`.
 
+**Skip path (no auto-capture).** Several branches below may decide to skip auto-capture (kill switch matched, gate dropped, compound reported skipped, or commit failed). "Skip path" always means the same thing:
+
+1. Execute **none** of the remaining 4.5.x sub-steps.
+2. **Resume Step 4's chosen ship operation** (`git merge` / `git push` / `gh pr create`) as if 4.5 had never run.
+3. Then proceed to Step 5.
+
+Skipping auto-capture must NEVER abort the user's chosen ship action. Auto-capture is additive; its absence does not block shipping.
+
 #### 4.5.1 Kill-switch check
 
 Scan the current conversation history for any of these opt-out phrases the user may have said at any point in this session:
@@ -105,7 +113,7 @@ Scan the current conversation history for any of these opt-out phrases the user 
 - "don't compound this"
 - Any semantically equivalent statement whose clear intent is to disable auto-capture for this session
 
-If matched: emit no output and proceed to Step 5 directly — do not invoke auto-capture.
+If matched: emit no output and take the **Skip path** above — do not invoke auto-capture, but still complete the ship operation.
 
 Explicit manual invocations of `sp-compound:compound` remain available to the user at any time regardless of this flag; the flag only suppresses Step 4.5.
 
@@ -138,7 +146,7 @@ Also detect whether this branch came from a planned workflow:
 - Commit messages include a root-cause description (phrases like "fix root cause", "resolves", "regression", "deadlock", "race", "leak") that correspond to real non-trivial diff hunks.
 - Diff touches 3+ files across 2+ modules with behavioral code changes (non-test, non-doc files).
 
-**Borderline (neither hard-drop nor strong-keep):** apply a single prose-judgment question to the orchestrator: *"From this session's conversation, can I articulate a non-obvious learning (root cause, design decision, reusable pattern, or verified constraint) that a future reader of `.sp-compound/solutions/` would benefit from?"* If yes → proceed; if no → skip (emit no output and continue to the rest of Step 4 / Step 5).
+**Borderline (neither hard-drop nor strong-keep):** apply a single prose-judgment question to the orchestrator: *"From this session's conversation, can I articulate a non-obvious learning (root cause, design decision, reusable pattern, or verified constraint) that a future reader of `.sp-compound/solutions/` would benefit from?"* If yes → proceed; if no → take the **Skip path**.
 
 The notable-learning gate logic lives entirely in this skill's prose; no sub-agent dispatch, no external classifier.
 
@@ -149,7 +157,7 @@ If kill switch did not fire and the notable-learning gate returned proceed:
 Invoke `sp-compound:compound mode:auto` with the current session's problem-and-solution context. Capture its single-line output.
 
 - On `✓ Captured: <path>` — retain `<path>` and `pre_state` (if returned) for the rollback window (the remainder of this skill's turn plus the next few user turns). Proceed to 4.5.4.
-- On `✓ Auto-capture skipped: <reason>` — surface the line to the user as-is and proceed to Step 5 without a capture commit.
+- On `✓ Auto-capture skipped: <reason>` — surface the line to the user as-is, then take the **Skip path** (no capture commit, but the ship operation still runs).
 
 #### 4.5.4 Commit captured doc onto the feature branch
 
@@ -165,7 +173,28 @@ EOF
 )"
 ```
 
-Substitute `<short-problem-slug>` with a kebab-case hint derived from the captured doc's filename (the dated-slug segment), not from free-form invention. If the commit fails (e.g., hook rejects), do NOT force through — report the failure to the user, roll back by `git rm --cached <path> && rm <path>`, and proceed to Step 5.
+Substitute `<short-problem-slug>` with a kebab-case hint derived from the captured doc's filename (the dated-slug segment), not from free-form invention.
+
+If the commit fails (e.g., hook rejects), do NOT force through — report the failure to the user, then clean up based on whether this capture was a new file or an update:
+
+- **New-file case** (compound did NOT return `pre_state`): the doc did not exist before this turn, so remove the staged + on-disk file:
+
+  ```bash
+  git rm --cached <path>
+  rm <path>
+  ```
+
+- **Update case** (compound returned `pre_state`): an existing doc was overwritten in memory; restore it and unstage so the working tree matches HEAD again:
+
+  ```bash
+  # Restore pre-update contents (write the saved pre_state back to the file)
+  printf '%s' "$pre_state" > <path>
+  git restore --staged <path>
+  ```
+
+  Never use `git rm` in the update case — that would delete the existing doc and compound the failure into data loss.
+
+After cleanup, take the **Skip path** — the ship operation must still run.
 
 After the capture commit succeeds, print exactly one line to the user (reusing the line compound emitted):
 

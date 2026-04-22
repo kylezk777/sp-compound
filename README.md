@@ -110,7 +110,8 @@ Each stage chains automatically to the next:
 brainstorm ──► plan ──► work ──► review ──► finishing-branch
                                               │
                                               ▼
-                                           compound (manual, after merge)
+                                           compound (auto via finishing-branch
+                                                     Step 4.5, or manual anytime)
 ```
 
 | Stage | Skill | Purpose |
