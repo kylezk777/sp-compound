@@ -91,7 +91,7 @@ The skills chain automatically:
 - `plan` -> invokes `work` when plan approved
 - `work` -> invokes `review` when implementation complete
 - `work` -> invokes `finishing-branch` after review passes
-- `compound` is invoked manually by user after merge
+- `compound` is invoked either automatically by `finishing-branch` Step 4.5 (Options 1 or 2, notable-learning gate passes, no session kill switch) or manually by the user at any time
 
 ## Skill Priority
 
