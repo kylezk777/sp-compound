@@ -42,6 +42,37 @@ Note: Created in compact-safe mode. For richer documentation (cross-references,
 overlap detection), re-run compound in a fresh session.
 ```
 
+### Auto Mode
+
+Invocation: `sp-compound:compound mode:auto` — designed for skill-to-skill calls (e.g., from `sp-compound:finishing-branch`). Never blocks, never prompts, never prints multi-line summaries or menus.
+
+Behavior:
+1. **Runs** Phase 0.5 (auto memory scan) and Phase 1 (3 parallel research agents).
+2. **Runs** Phase 2 assembly with the full overlap matrix — including update-over-create when high overlap is detected.
+3. **Skips** Phase 2.5 (no `compound-refresh` suggestion).
+4. **Skips** Phase 3 (no discoverability instruction-file editing).
+5. **Does not print** the "What's next?" menu or any blocking question.
+
+**Pre-snapshot for rollback** (applies only on update case): before overwriting an existing doc, read and return its current contents as `pre_state` in the invocation result alongside the target path. The calling skill is responsible for retaining this snapshot for the rollback window.
+
+Output contract — exactly **one** line to stdout:
+
+```
+✓ Captured: <repo-relative-path>
+```
+
+If overlap was high and an existing doc was updated, still use `✓ Captured:`; the caller owns "new vs update" semantics via the optional `pre_state` payload it received.
+
+Error contract — if classification fails (no clean category/track assignment), no write happens. Instead emit exactly one line and return:
+
+```
+✓ Auto-capture skipped: <short reason>
+```
+
+Callers must treat this as non-fatal and continue their own flow.
+
+Auto Mode MUST NOT be used when `$ARGUMENTS` also contains `mode:compact` — mode tokens are mutually exclusive; reject with an error line explaining which modes conflict.
+
 ---
 
 ## Phase 0.5: Auto Memory Scan
@@ -171,6 +202,7 @@ Read and follow `references/discoverability-check.md`. Verify that project instr
 | Research and assembly run in parallel | Phase 1 completes -> then Phase 2 assembly runs |
 | Multiple files created during workflow | One solution doc written or updated (plus optional instruction-file edit for discoverability) |
 | Creating a new doc when existing doc covers the same problem | Check overlap assessment; update existing doc when overlap is high |
+| Auto Mode prints the "What's next?" menu or a multi-line summary | Auto Mode emits exactly one line; any multi-line output means the mode dispatch leaked into Full-mode output |
 
 ## Output
 
@@ -197,6 +229,7 @@ After displaying the output, present the "What's next?" options using the platfo
 **Invoked by:**
 - User manually after solving a notable problem
 - Suggested by `sp-compound:work` at Phase 4 when a notable problem was solved
+- `sp-compound:finishing-branch` (Step 4.5) — via `mode:auto`, when user ships Option 1/2 and the notable-learning gate passes
 
 **May invoke:**
 - `sp-compound:compound-refresh` (Phase 2.5) when new learning contradicts existing docs
