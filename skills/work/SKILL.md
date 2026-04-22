@@ -231,6 +231,7 @@ After review passes:
 1. **Update plan status** — if the input document has YAML frontmatter with a `status` field, update it to `completed`
 2. **Invoke `sp-compound:finishing-branch`** — present merge/PR/cleanup options
 3. **Suggest `sp-compound:compound`** — if a notable problem was solved during this work, suggest capturing the learning
+   - If the user then runs `sp-compound:finishing-branch` and selects Options 1 or 2, Step 4.5 there will auto-capture — in that case this manual suggestion is redundant and should be skipped. Only surface this suggestion when the user signals they will **not** route through finishing-branch (e.g., Option 3 "keep as-is" / Option 4 "discard" / ad-hoc no-ship flow).
 
 ## Key Principles
 
