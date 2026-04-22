@@ -201,12 +201,12 @@ For Options 2 and 3: Keep worktree (may need it for PR revisions or later work).
 
 ## Quick Reference
 
-| Option | Merge | Push | Keep Worktree | Cleanup Branch |
-|--------|-------|------|---------------|----------------|
-| 1. Merge locally | Yes | - | - | Yes |
-| 2. Create PR | - | Yes | Yes | - |
-| 3. Keep as-is | - | - | Yes | - |
-| 4. Discard | - | - | - | Yes (force) |
+| Option | Merge | Push | Keep Worktree | Cleanup Branch | Auto-Capture |
+|--------|-------|------|---------------|----------------|--------------|
+| 1. Merge locally | Yes | - | - | Yes | Yes (if gate passes) |
+| 2. Create PR | - | Yes | Yes | - | Yes (if gate passes) |
+| 3. Keep as-is | - | - | Yes | - | No |
+| 4. Discard | - | - | - | Yes (force) | No |
 
 ## Red Flags
 
