@@ -1,7 +1,7 @@
 {
   "name": "sp-compound",
   "description": "Complete SDD plugin combining Superpowers execution with Compound Engineering knowledge flywheel. 17 skills covering Brainstorm, Plan, Work, Review, Compound, and supporting workflows.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "author": {
     "name": "kyle"
   },
