@@ -107,7 +107,7 @@ For each verdict returned by the agent, validate in this order. Any validation f
 ### Apply Verdicts
 
 - `KEEP`: finding unchanged.
-- `DOWNGRADE`: reduce `severity` by one level (P0→P1, P1→P2, P2→P3). Set `original_severity` to the pre-downgrade value. Annotate in Reviewer column: `<reviewer> (<orig>→<new>, triage)`.
+- `DOWNGRADE`: reduce `severity` by one level (P0→P1, P1→P2, P2→P3). Set `original_severity` to the pre-downgrade value. Annotate in Reviewer column: `<reviewer> (<orig>→<new>, triage)`. **P3 floor:** DOWNGRADE on a P3 finding is treated as KEEP and recorded as invalidated in the artifact.
 - `DROP`: remove finding from the main pipeline output. Preserve the full record in the artifact (see below).
 
 Every finding (kept, downgraded, or dropped) gets these pipeline-added fields stored in the artifact:

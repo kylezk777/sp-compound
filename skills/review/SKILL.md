@@ -171,6 +171,7 @@ Read and follow `references/merge-pipeline.md`.
 3.5. **Pre-existing detection** — git blame to separate pre-existing from new findings
 4. **Cross-reviewer boost** — 2+ reviewers on same issue → +0.10 confidence (cap 1.0)
 5. **Resolve disagreements** — annotate when reviewers disagree on severity/route. Keep most conservative.
+5.5. **Adversarial triage** — dispatch `triage-reviewer` when >= 5 new findings and `mode:no-triage` is absent. Emits KEEP/DOWNGRADE/DROP verdicts with hard recall safety rails (see Stage 5.5 below).
 6. **Route** — set final autofix_class, owner, requires_verification. Never widen without evidence.
 7. **Partition** — fixer queue (safe_auto -> review-fixer), residual actionable (gated_auto/manual -> downstream-resolver), report-only (advisory + human/release)
 8. **Sort** — severity → confidence → file → line
@@ -348,11 +349,14 @@ Autofix, report-only, headless: stop after report and residual handoff. Never co
 
 **Dispatches:**
 - Review agents: correctness, testing, security (conditional), performance (conditional), adversarial (conditional)
+- triage-reviewer (conditional, Stage 5.5; uses highest model tier, not mid-tier)
 - learnings-researcher agent (always)
 
 **Consumes:**
 - `references/findings-schema.md` -- output format contract
-- `references/merge-pipeline.md` -- merge rules
+- `references/merge-pipeline.md` -- merge rules (includes Step 5.5 triage)
 - `references/diff-scope.md` -- scope classification rules for reviewers
 - `references/resolve-base.sh` -- base branch detection script (fork-safe)
+- `references/triage-rubric.md` -- triage verdict rubric (Stage 5.5)
+- `references/triage-test-scenarios.md` -- triage regression fixtures
 - `.sp-compound/solutions/` -- via learnings-researcher for historical context

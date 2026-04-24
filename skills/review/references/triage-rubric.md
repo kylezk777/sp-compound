@@ -16,6 +16,8 @@ Exactly one of:
 
 Any verdict with `confidence_in_verdict < 0.70` is invalidated by the pipeline and the finding reverts to `KEEP`.
 
+**P3 floor:** `DOWNGRADE` is undefined on a P3 finding (no P4 exists). If a verdict of `DOWNGRADE` targets a P3 finding, the pipeline treats it as `KEEP` and records the invalidation in the artifact.
+
 ## Rubric Dimensions (MUST address in every verdict)
 
 For every finding, the agent produces `reach_evidence` and `impact_evidence` by reasoning through these six dimensions. The verdict_reason text should synthesize the findings across them.
@@ -99,7 +101,7 @@ Verdict: DROP at confidence 0.92. Reason: "CI runs flake8 per `pyproject.toml:18
 
 ### Example B: Red-line forced KEEP
 Finding: P0 SQL-injection flagged by security-reviewer. Triager suspects ORM parameterization downstream but cannot cite the call site.
-Verdict: KEEP. Reason: "P0 severity + security-reviewer on data-mutation path — hard red-line R15. ORM containment unverified."
+Verdict: KEEP. Reason: "P0 severity + security-reviewer on data-mutation path — Hard Red-Lines #1 and #3. ORM containment unverified."
 
 ### Example C: Valid DOWNGRADE
 Finding: P1 N+1 query on admin dashboard. Triager finds admin-only middleware at `app/middleware/staff.py:12` and SLO data capping concurrent users at 20.

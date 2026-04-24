@@ -50,8 +50,8 @@ Scenarios are grouped by expected verdict. A correct implementation of the triag
 }
 ```
 
-**Expected verdict:** `DROP` — BUT ONLY IF the rubric can cite concrete framework middleware evidence (e.g., `app/__init__.py` installs `CSRFProtect()` globally). If the evidence is unverifiable from diff+intent+file list alone, expected verdict is `KEEP` (evidence-anchoring safety rail R17).
-**Hard red-line check:** Even with strong evidence, this finding is from `security-reviewer` at P1. R15 forbids DROP if the path is auth/payment/data-mutation/external-API. A POST handler for profile edits touches data mutation → DROP forbidden. Expected verdict adjusts to `DOWNGRADE` (P1 → P2) at most, or `KEEP`.
+**Expected verdict:** `DROP` — BUT ONLY IF the rubric can cite concrete framework middleware evidence (e.g., `app/__init__.py` installs `CSRFProtect()` globally). If the evidence is unverifiable from diff+intent+file list alone, expected verdict is `KEEP` (evidence-anchoring rule — see `triage-rubric.md` > Evidence Anchoring Rule).
+**Hard red-line check:** Even with strong evidence, this finding is from `security-reviewer` at P1. The rubric's Hard Red-Line #3 (security/correctness at P1+ on auth/payment/data-mutation/external-API paths) forbids DROP. A POST handler for profile edits touches data mutation → DROP forbidden. Expected verdict adjusts to `DOWNGRADE` (P1 → P2) at most, or `KEEP`.
 
 **This scenario exercises the intersection of containment evidence and the safety rail.**
 
@@ -102,7 +102,7 @@ Scenarios are grouped by expected verdict. A correct implementation of the triag
 ```
 
 **Triager reasoning (hypothetical):** "The query uses SQLAlchemy ORM — input is parameterized further down."
-**Expected verdict:** `KEEP` — hard red-line R15 (severity P0) forbids DROP regardless of triager confidence. Maximum allowed effect is DOWNGRADE to P1, and only if evidence is anchored (R17).
+**Expected verdict:** `KEEP` — Hard Red-Line #1 (severity P0) forbids DROP regardless of triager confidence. Maximum allowed effect is DOWNGRADE to P1, and only if evidence is anchored (`triage-rubric.md` > Evidence Anchoring Rule).
 
 **This scenario exercises the P0 red-line.**
 
@@ -127,7 +127,7 @@ Scenarios are grouped by expected verdict. A correct implementation of the triag
 }
 ```
 
-**Expected verdict:** `KEEP` — 2+ reviewer consensus (R15) forbids DROP. DOWNGRADE is allowed only with explicit evidence; default is KEEP.
+**Expected verdict:** `KEEP` — Hard Red-Line #2 (2+ reviewer consensus) forbids DROP. DOWNGRADE is allowed only with explicit evidence; default is KEEP.
 
 **This scenario exercises the cross-reviewer consensus red-line.**
 
@@ -153,7 +153,7 @@ Scenarios are grouped by expected verdict. A correct implementation of the triag
 ```
 
 **Triager emits:** `DROP` with `verdict_reason: "low risk in practice"` and `confidence_in_verdict: 0.92`.
-**Expected pipeline effect:** `KEEP` — verdict_reason is NOT anchored to a concrete `file:line`, middleware, config, or PR-text quote (R17). Pipeline invalidates the DROP and reverts to KEEP. Coverage line records this invalidation.
+**Expected pipeline effect:** `KEEP` — verdict_reason is NOT anchored to a concrete `file:line`, middleware, config, or PR-text quote (per the Evidence Anchoring Rule in `triage-rubric.md` and Step 5.5 Verdict Validation step 3 in `merge-pipeline.md`). Pipeline invalidates the DROP and reverts to KEEP. Coverage line records this invalidation.
 
 **This scenario exercises the evidence-anchoring safety rail.**
 
@@ -167,28 +167,28 @@ PR labels: ["hotfix"]
 ```
 
 **Merged findings:** 8 findings, severity mix.
-**Expected pipeline effect:** Step 5.5 is skipped entirely per R16. No verdicts generated. Coverage line: `Triage: skipped (PR labeled hotfix).` All 8 findings flow to Step 7 unchanged.
+**Expected pipeline effect:** Step 5.5 is skipped entirely per the PR-Label Bypass rule (see `triage-rubric.md` > PR-Label Bypass and `merge-pipeline.md` Step 5.5 > PR-Label Bypass). No verdicts generated. Coverage line: `Triage: skipped (PR labeled hotfix).` All 8 findings flow to Step 6 unchanged.
 
 **This scenario exercises PR-label bypass.**
 
 ## Scenario 8: Threshold not met
 
 **Merged findings:** 4 findings.
-**Expected pipeline effect:** Step 5.5 is a no-op (threshold is 5 per R9). Coverage line omits the triage entry. No artifact written.
+**Expected pipeline effect:** Step 5.5 is a no-op (threshold is 5 per `merge-pipeline.md` Step 5.5 > Trigger). Coverage line omits the triage entry. No artifact written.
 
 **This scenario exercises the trigger threshold.**
 
 ## Scenario 9: Overflow warning
 
 **Merged findings:** 12 findings. Triager DROPs 7 (58%).
-**Expected pipeline effect:** Main report prepends `⚠  Triage dropped >50% of findings in this run. Inspect triage.json before trusting the verdict.` before the findings tables (R18).
+**Expected pipeline effect:** Main report prepends `⚠  Triage dropped >50% of findings in this run. Inspect triage.json before trusting the verdict.` before the findings tables (per `merge-pipeline.md` Step 5.5 > Overflow Warning).
 
 **This scenario exercises the overflow warning.**
 
 ## Scenario 10: Fail-open on triager error
 
-**Trigger:** Triager subagent returns malformed JSON (no `findings` key).
-**Expected pipeline effect (R28):** Step 5.5 treated as no-op. All 12 findings pass through unchanged. Coverage line: `Triage: failed (reason: malformed-output). All findings shown unfiltered.` No artifact written. Review does NOT abort.
+**Trigger:** Triager subagent returns malformed JSON (no `verdicts` key).
+**Expected pipeline effect (per `merge-pipeline.md` Step 5.5 > Fail-Open):** Step 5.5 treated as no-op. All 12 findings pass through unchanged. Coverage line: `Triage: failed (reason: malformed-output). All findings shown unfiltered.` No artifact written. Review does NOT abort.
 
 **This scenario exercises fail-open behavior.**
 
