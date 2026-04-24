@@ -37,7 +37,7 @@ Default (no tokens): interactive mode.
 |------|------|----------|
 | **Interactive** (default) | No mode token | Review, apply safe_auto, present findings, ask policy decisions on gated/manual. Triage runs if >= 5 findings. |
 | **Autofix** | `mode:autofix` | No interaction. Apply safe_auto only, write residual work, never commit/push/PR. Triage runs if >= 5 findings. |
-| **Report-only** | `mode:report-only` | Read-only. Report only, no edits, no artifacts, no todos, no commit/push/PR. Triage runs if >= 5 findings but no artifact is written. Safe for parallel use. Cannot switch shared checkout. |
+| **Report-only** | `mode:report-only` | Read-only. Report only, no edits, no artifacts, no todos, no commit/push/PR. Triage runs if >= 5 findings but no artifact is written AND DROP verdicts are disabled (downgraded to DOWNGRADE) so findings remain recoverable. Safe for parallel use. Cannot switch shared checkout. |
 | **Headless** | `mode:headless` | Programmatic. Apply safe_auto (single pass), return structured text output, no todos, never commit/push/PR. Triage runs if >= 5 findings. Cannot switch shared checkout. End with "Review complete" signal. |
 
 ### Headless mode guardrails

@@ -45,7 +45,7 @@ Would a formatter or linter already catch this? If yes, the finding is low-value
 The following findings MUST NOT receive a `DROP` verdict. DOWNGRADE by one level is allowed if evidence warrants:
 
 1. **P0 severity.** Any `severity: P0` finding is KEEP or DOWNGRADE-to-P1 only.
-2. **Cross-reviewer consensus.** Any finding whose `evidence` field lists 2 or more reviewers. Disagreement already handled by Step 5; consensus is a strong signal.
+2. **Cross-reviewer consensus.** Any finding whose `reviewer` field names 2 or more reviewers (comma-separated after the merge pipeline's Step 3 dedup). Disagreement already handled by Step 5; consensus is a strong signal.
 3. **Security/correctness on sensitive paths.** Any finding from `security-reviewer` or `correctness-reviewer` at severity ≥ P1 where the code path touches:
    - Authentication / authorization / session handling
    - Payment / billing / financial data
@@ -73,6 +73,8 @@ Every `verdict_reason` MUST anchor to at least one of:
 - A direct quote from the PR title, body, or labels
 
 Verdicts with abstract justifications only ("this is low risk", "unlikely in practice", "edge case") are INVALID. The pipeline MUST revert such findings to `KEEP`.
+
+**Non-tautological anchor for DROP.** For a `DROP` verdict specifically, the citation must reference at least one file, line, config path, middleware, caller, or PR-text quote that is DIFFERENT from the finding's own `file` (and ideally different from its line region). Citing the finding's own `file:line` back at itself (e.g., verdict_reason "`app/api/search.py:55` uses parameterized queries" for a finding whose `file` IS `app/api/search.py:55`) is tautological — it restates the claim under review rather than evidencing containment. Pipelines MUST invalidate such DROPs and revert to KEEP. DOWNGRADE verdicts are held to the general anchoring rule only; the non-tautological requirement applies to DROP alone.
 
 ## Verdict Output Fields
 

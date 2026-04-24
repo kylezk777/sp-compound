@@ -33,7 +33,7 @@ Synthesize the six into your `verdict_reason`. Every verdict_reason MUST anchor 
 ## Hard Red-Lines (you MUST NOT DROP these)
 
 - Any finding with `severity: P0`
-- Any finding whose `evidence` lists 2+ reviewers (cross-reviewer consensus)
+- Any finding whose `reviewer` field names 2+ reviewers (comma-separated, cross-reviewer consensus after merge pipeline dedup)
 - Any `security-reviewer` or `correctness-reviewer` finding at P1+ on auth / payment / data-mutation / external-API paths
 
 For these, the most aggressive allowed action is DOWNGRADE by one level. If unsure which path a finding touches, default to KEEP.

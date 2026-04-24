@@ -157,6 +157,32 @@ Scenarios are grouped by expected verdict. A correct implementation of the triag
 
 **This scenario exercises the evidence-anchoring safety rail.**
 
+## Scenario 6b: KEEP — tautological anchor reverted (DROP cites finding's own file)
+
+**Merged finding:**
+
+```json
+{
+  "reviewer": "security-reviewer",
+  "title": "Potential XSS in user profile template",
+  "severity": "P2",
+  "file": "templates/user_profile.html",
+  "line": 30,
+  "confidence": 0.80,
+  "autofix_class": "manual",
+  "owner": "downstream-resolver",
+  "requires_verification": true,
+  "pre_existing": false,
+  "why_it_matters": "User-supplied input rendered without explicit escaping",
+  "evidence": ["line 30 renders `{{ user.bio }}` without `|escape` filter"]
+}
+```
+
+**Triager emits:** `DROP` with `verdict_reason: "Output at templates/user_profile.html:30 is auto-escaped by the template engine."` and `confidence_in_verdict: 0.92`.
+**Expected pipeline effect:** `KEEP` — verdict_reason anchors ONLY to the finding's own file (`templates/user_profile.html`); no independent evidence of containment (e.g., a template engine config, framework default, or separate middleware file) is cited. Per the Non-tautological anchor rule (`triage-rubric.md` > Evidence Anchoring Rule and `merge-pipeline.md` Step 5.5 Verdict Validation step 3a), the pipeline reverts the DROP to KEEP.
+
+**This scenario exercises the non-tautological-anchor rule for DROP.**
+
 ## Scenario 7: SKIP — PR labeled `hotfix`
 
 **PR metadata:**

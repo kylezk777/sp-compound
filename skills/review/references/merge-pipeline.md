@@ -24,7 +24,7 @@ When duplicates found:
 - Keep highest severity
 - Keep highest confidence
 - Merge evidence from all reviewers
-- Record all contributing reviewers
+- Record all contributing reviewers in the `reviewer` field as a comma-separated list (e.g., `correctness-reviewer, security-reviewer`). The `reviewer` field is the canonical source for cross-reviewer consensus detection downstream (Step 4 boost and Step 5.5 red-line #2).
 
 ## Step 3.5: Pre-Existing Detection
 
@@ -98,17 +98,27 @@ For each verdict returned by the agent, validate in this order. Any validation f
 1. **Confidence gate:** `confidence_in_verdict < 0.70` → revert to KEEP
 2. **DROP confidence gate:** If `verdict == DROP` and `confidence_in_verdict < 0.90` → revert to KEEP
 3. **Evidence anchor:** `verdict_reason` MUST contain at least one of: a `file:line` citation, a caller/middleware/config path, or a direct quote from PR text. If not → revert to KEEP.
+   **3a. Non-tautological anchor (DROP only):** If `verdict == DROP`, the verdict_reason's cited file(s) MUST include at least one path different from the finding's own `file`. A DROP whose sole anchor is the finding's own `file` (optionally with any `:line` suffix) is tautological — it restates the target rather than evidencing containment. Revert such DROPs to KEEP. DOWNGRADE verdicts are not subject to this rule.
 4. **Red-line enforcement:** If `verdict == DROP` and any of:
    - finding's `severity == P0`
-   - finding's `evidence` field lists 2+ reviewers
-   - finding is from `security-reviewer` or `correctness-reviewer` at P1+ AND the file path matches auth/payment/data-mutation/external-API heuristics (match on path components: `auth`, `session`, `login`, `pay`, `billing`, `checkout`, `payment`, `api/`, `webhook`, or database write operations in the diff)
+   - finding's `reviewer` field names 2+ reviewers (comma-separated after Step 3 dedup)
+   - finding is from `security-reviewer` or `correctness-reviewer` at P1+ AND the file path matches auth/payment/data-mutation/external-API heuristics. Match triggers on ANY of:
+     - **Auth / session / identity:** path contains (case-insensitive) `auth`, `session`, `login`, `logout`, `signin`, `signup`, `token`, `jwt`, `oauth`, `saml`, `sso`, `credential`, `password`, `secret`, `admin`
+     - **Authorization / access control:** `permission`, `role`, `acl`, `rbac`, `privilege`, `grant`, `policy`
+     - **Crypto:** `crypto`, `cipher`, `encrypt`, `decrypt`, `hash`, `signature`, `verify`
+     - **Payment / finance:** `pay`, `billing`, `checkout`, `payment`, `invoice`, `subscription`, `charge`, `refund`
+     - **External API boundary:** `api/`, `webhook`, `callback`, `oauth/`, `/v1/`, `/v2/`, `endpoint`
+     - **Data layer / mutation:** `models/`, `db/`, `repository/`, `repositories/`, `dao/`, `store/`, `storage/`, `migrations/`, `handlers/`, `controllers/`, `routes/`, `views/`, `middleware/`
+     - **Mutation verb in diff:** diff contains any of `INSERT`, `UPDATE`, `DELETE`, `DROP TABLE`, `TRUNCATE`, `.save(`, `.create(`, `.update(`, `.destroy(`, `.delete(`, `.bulk_create(`, `.bulk_update(`, `.execute(`, `.raw(`, or equivalent idioms for the project's ORM/DB layer
    → revert to `DOWNGRADE` (one-level lowering) instead of DROP.
+
+If the diff touches paths or idioms you cannot confidently classify against this list, the red-line is presumed to fire and DROP is reverted to DOWNGRADE. Over-protection is preferred over under-protection at this gate.
 
 ### Apply Verdicts
 
 - `KEEP`: finding unchanged.
 - `DOWNGRADE`: reduce `severity` by one level (P0→P1, P1→P2, P2→P3). Set `original_severity` to the pre-downgrade value. Annotate in Reviewer column: `<reviewer> (<orig>→<new>, triage)`. **P3 floor:** DOWNGRADE on a P3 finding is treated as KEEP and recorded as invalidated in the artifact.
-- `DROP`: remove finding from the main pipeline output. Preserve the full record in the artifact (see below).
+- `DROP`: remove finding from the main pipeline output. Preserve the full record in the artifact (see below). **Mode restriction:** DROP is DISABLED in `report-only` mode (the artifact is suppressed in report-only, so a DROP would make the finding irrecoverable). In report-only, any DROP verdict is downgraded to DOWNGRADE, and findings that would have been dropped are kept in the main output at their new severity. Record in the Coverage line: `Triage: DROPs disabled in report-only mode — K would-be drops converted to downgrades.`
 
 Every finding (kept, downgraded, or dropped) gets these pipeline-added fields stored in the artifact:
 - `triage_verdict`, `triage_verdict_reason`, `triage_confidence`, `original_severity` (when applicable)
