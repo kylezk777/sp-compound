@@ -52,3 +52,21 @@ Upstream features with potential but not yet ready for adoption. Reviewed during
 **Blocker:** Depends on agent-browser CLI (external dependency not universally available)
 **Added:** 2026-04-12
 **Re-evaluate by:** 2026-07-12
+
+### ce-sessions (session history search)
+
+**Source:** CE
+**What it does:** Search past Claude Code / Codex / Cursor session files for what was tried, how a problem was investigated, or what happened recently. Backed by two primitives (ce-session-inventory, ce-session-extract) that own JSONL layout knowledge.
+**Why watch:** Adjacent to the knowledge flywheel — raw session history is a different axis from curated .sp-compound/solutions/ entries and could feed compound with un-captured context. Strong pre-plan research value.
+**Blocker:** Infrastructure cost (three coupled skills plus scripts that know each platform's session-store layout); unclear demand signal; risk of overlap/confusion with curated solutions store (principle #4).
+**Added:** 2026-04-22
+**Re-evaluate by:** 2026-07-22
+
+### ce-doc-review
+
+**Source:** CE
+**What it does:** Reviews requirements or plan documents via parallel persona sub-agents, auto-applies safe fixes, routes remaining findings through an interactive walk-through.
+**Why watch:** Fills a pre-code review gap between plan output and work input — currently sp-compound has no explicit doc-quality gate on plan.md before dispatch.
+**Blocker:** plan and review already carry strong validation logic; persona-agent dispatch is expensive; overlap with plan's self-check could muddy the chain contract (principle #2). Need demand signal before adopting.
+**Added:** 2026-04-22
+**Re-evaluate by:** 2026-07-22

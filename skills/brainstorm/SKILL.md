@@ -84,6 +84,10 @@ Classify work scope using the feature description and a light repo scan:
 
 If the scope is unclear, ask one targeted question to disambiguate. Match ceremony to scope throughout: lightweight brainstorms stay compact, deep brainstorms explore fully.
 
+**Deep sub-mode — feature vs product:** at Deep scope, also classify whether the brainstorm inherits product shape or must establish it.
+- **Deep — feature** (default): existing product shape anchors decisions (actors, core outcome, primary flows already established). Brainstorm extends or refines.
+- **Deep — product**: primary actors, core outcome, positioning, or end-to-end flows are materially unresolved. Brainstorm must establish product shape. Triggers extra pressure-test questions and triggered sections in the requirements doc.
+
 ### Clear Requirements Bypass
 
 If the user already provides specific acceptance criteria, references existing patterns, describes exact expected behavior, or has a constrained well-defined scope -- skip Phases 1-2 entirely. Confirm understanding, then go straight to Phase 4 (present requirements) or Phase 6 (transition) if a requirements doc adds no value.
@@ -140,6 +144,11 @@ Before generating approaches, challenge the request to catch misframing. Match d
 - What durable capability should this create in 6-12 months?
 - Does this move the product toward that, or is it only a local patch?
 
+**Deep — product:** Deep questions plus:
+- What's the sharpest user outcome this earns, and what evidence or assumption supports it?
+- What adjacent product could we accidentally build instead, and why is that the wrong one?
+- What would have to be true for this to fail?
+
 Use the result to sharpen the conversation, not to override the user's intent.
 
 ## Phase 1.75: Visual Companion
@@ -180,6 +189,7 @@ A question about a UI topic is not automatically a visual question. "What does p
 - When useful, include one deliberately higher-upside alternative: what adjacent addition or reframing would most increase usefulness or durability without disproportionate carrying cost? Present it as a challenger option alongside the baseline, not as the default. Omit when the work is already over-scoped or the baseline is clearly right.
 - Present all approaches first, then state your recommendation -- leading with a recommendation before the user sees alternatives anchors the conversation prematurely
 - Present conversationally, not as a formal comparison matrix
+- At Deep-product tier, alternatives should differ on **what** is built (product shape, actors, positioning), not just **how**
 
 ## Phase 4: Present Requirements
 

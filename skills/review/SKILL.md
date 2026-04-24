@@ -77,6 +77,8 @@ Routing rules:
 Use directly: `git merge-base HEAD <base>`, then `git diff -U10`. Do not combine with PR/branch target.
 
 ### With PR number or URL argument
+**Skip pre-check:** Before checkout, run `gh pr view <pr> --json state`. If `state` is `CLOSED` or `MERGED`, stop with `PR is closed/merged; not reviewing.` Draft PRs are reviewed normally (draft is not a skip condition).
+
 If `mode:report-only` or `mode:headless`: do not switch shared checkout (see mode guardrails). Verify worktree is clean (`git status --porcelain`) before `gh pr checkout`. Fetch PR metadata with `gh pr view --json title,body,baseRefName,headRefName,url`. Compute local diff against PR base branch (not `gh pr diff`, which misses local fix commits). If base ref cannot be resolved, stop with error.
 
 ### With branch name argument

@@ -68,9 +68,24 @@ This ensures serial execution respects batch order, and parallel execution only 
 | **Direct inline** | Trivial (1-2 files) | Implement directly, no subagents |
 | **Inline with TDD** | 1-2 tasks | Execute tasks in this session following flexible-tdd |
 | **Serial subagent** | 3+ tasks with dependencies | One implementer subagent per task + two-stage review (SP architecture) |
-| **Parallel subagent** | 3+ independent tasks | Multiple implementer subagents + review after each |
+| **Parallel subagent** | 3+ independent tasks that pass the Parallel Safety Check | Multiple implementer subagents dispatched concurrently, reviewed after batch completes. Requires plan-unit metadata (Goal, Files, Approach, Test scenarios) |
 
 **Default for 3+ tasks with dependencies: Serial subagent** — this is SP's proven path.
+
+**Parallel Safety Check** (required before choosing parallel dispatch):
+1. Build a file-to-unit mapping from each candidate unit's `Files:` section (create/modify/test)
+2. Any file appearing in 2+ units → downgrade to serial subagent (git index contention / last-writer-wins)
+3. Log the downgrade reason (e.g., "Units 2 and 4 share `routes.rb` — using serial")
+
+**Parallel subagent constraints** — when dispatching in parallel (not serial/inline):
+- Instruct each subagent: "Do not `git add`, do not commit, do not run the full test suite. The orchestrator handles staging, commits, and suite runs after the batch completes."
+- These constraints prevent git index corruption and test interference across concurrent subagents.
+
+**After a parallel batch completes:**
+1. Wait for every subagent in the batch before acting on any result
+2. Cross-check actual files each subagent modified (not just declared `Files:`) — a collision means 2+ subagents wrote the same file, and only the last writer survives. On collision: commit all non-colliding files first, then re-run affected units serially for the shared file
+3. For each unit in dependency order: review diff, run relevant tests, stage only that unit's files, commit
+4. Then run the two-stage review (2.3/2.4) for each unit before moving on
 
 ## Phase 2: Execute — Serial Subagent (Primary Path)
 
@@ -252,6 +267,7 @@ After review passes:
 - Skip subagent questions (answer before letting them proceed)
 - Accept "close enough" on spec compliance
 - Start code quality review before spec compliance confirmed
+- Re-scope the plan into "human-time phases" — agents execute at agent speed; context pressure is solved by subagent dispatch, not by breaking work into multi-day sessions. If a plan is genuinely too large, say so and return to `sp-compound:plan` to reduce scope
 
 **If subagent asks questions:** Answer clearly and completely.
 **If reviewer finds issues:** Implementer fixes → reviewer reviews again → repeat until approved.

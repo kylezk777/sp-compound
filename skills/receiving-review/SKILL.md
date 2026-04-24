@@ -183,12 +183,26 @@ RIGHT: "Grepped codebase - nothing calls this endpoint. Remove it (YAGNI)? Or is
 
 ## Reply Format
 
-When replying to feedback, quote the relevant part of the original comment for continuity:
+When replying to feedback, quote the relevant part of the original comment for continuity.
+
+**Verdict vocabulary** — classify each item to keep replies consistent:
+- `fixed` — code change made as requested
+- `fixed-differently` — code change made with a better approach; explain why it diverges
+- `replied` — no change needed; answered question or explained decision
+- `not-addressing` — feedback is factually wrong; skip with evidence
+- `needs-human` — cannot determine right action; leave thread open for user input
 
 ```
 > [quoted relevant part of original feedback]
 
 Addressed: [brief description of the fix]
+```
+
+For fixed-differently:
+```
+> [quoted relevant part of original feedback]
+
+Fixed differently: [what was done] because [why this approach is better].
 ```
 
 For items not addressed:

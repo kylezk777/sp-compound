@@ -128,7 +128,8 @@ Compile findings:
 2. **Reproduction steps** — verified steps to trigger (confirmed or unconfirmed)
 3. **Evidence** — test output, log excerpts, screenshots
 4. **Suggested fix** — if apparent, describe specific code changes
-5. **Open questions** — anything unclear
+5. **Tests to prevent recurrence** — beyond the reproduction test, which specific test files/assertions should be added; whether existing tests should have caught this and why they did not
+6. **Open questions** — anything unclear
 
 Present to user. Do NOT post to GitHub without explicit consent.
 
@@ -137,7 +138,8 @@ Ask the user:
 Investigation complete. How to proceed?
 1. Post findings to the issue as a comment
 2. Start working on a fix (invokes sp-compound:debug or sp-compound:work)
-3. Just review the findings (no external action)
+3. Capture as a learning (invokes sp-compound:compound)
+4. Just review the findings (no external action)
 ```
 
 If posting:

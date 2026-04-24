@@ -8,18 +8,26 @@ This document should behave like a lightweight PRD without PRD ceremony. Include
 
 The requirements document is for product definition and scope control. Do **not** include implementation details such as libraries, schemas, endpoints, file layouts, or code structure unless the brainstorm is inherently technical and those details are themselves the subject of the decision.
 
-**Required content for non-trivial work:**
-- Problem frame
-- Concrete requirements or intended behavior with stable IDs
-- Scope boundaries
-- Success criteria
+## Section matrix
 
-**Include when materially useful:**
-- Key decisions and rationale
-- Dependencies or assumptions
-- Outstanding questions
-- Alternatives considered
-- High-level technical direction only when the work is inherently technical and the direction is part of the product/architecture decision
+| Section | Lightweight | Standard / Deep-feature | Deep-product |
+|---|---|---|---|
+| Problem Frame | Required | Required | Required |
+| Actors (A-IDs) | Omit unless triggered | Triggered | Triggered |
+| Key Flows (F-IDs) | Omit unless triggered | Triggered | Expected by default |
+| Requirements (R-IDs) | Required | Required | Required |
+| Acceptance Examples (AE-IDs) | Omit unless triggered | Triggered | Triggered |
+| Success Criteria | Required | Required | Required |
+| Scope Boundaries | Single list | Single list | Split: "Deferred for later" + "Outside this product's identity" |
+| Key Decisions | When material | When material | When material |
+| Dependencies / Assumptions | When material | When material | When material |
+| Outstanding Questions | When material | When material | When material |
+| Next Steps | Required | Required | Required |
+
+**Triggered sections — when to include**
+- **Actors** — multiple humans, agents, or systems are meaningfully involved, or decisions change by whose perspective is optimized for.
+- **Key Flows** — work involves multi-step interaction or coordinates across existing flows.
+- **Acceptance Examples** — a requirement's behavior is hard to pin down without a concrete scenario; each example back-references `Covers: R-IDs`.
 
 **Document template** (omit clearly inapplicable optional sections):
 
@@ -34,6 +42,19 @@ topic: <kebab-case-topic>
 ## Problem Frame
 [Who is affected, what is changing, and why it matters]
 
+## Actors
+[Include when triggered. Stable A-IDs.]
+- A1. [Name or role]: [What they do in this context]
+
+## Key Flows
+[Include when triggered. Each flow: trigger, actors, steps, outcome, Covered by.]
+- F1. [Flow name]
+  - **Trigger:** [What initiates the flow]
+  - **Actors:** A1, A2
+  - **Steps:** [3-7 steps]
+  - **Outcome:** [What is true after the flow completes]
+  - **Covered by:** R1, R2
+
 ## Requirements
 
 **[Group Header]**
@@ -43,11 +64,24 @@ topic: <kebab-case-topic>
 **[Group Header]**
 - R3. [Concrete requirement in this group]
 
+## Acceptance Examples
+[Include when triggered. Each example is definitive for what it describes.]
+- AE1. **Covers R1, R2.** Given [state], when [action], [outcome].
+
 ## Success Criteria
-- [How we will know this solved the right problem]
+- [How we will know this solved the right problem — human outcome]
+- [How a downstream agent can tell the handoff was clean]
 
 ## Scope Boundaries
+[Lightweight / Standard / Deep-feature: single list.]
 - [Deliberate non-goal or exclusion]
+
+[Deep-product only: split into two subsections instead.]
+### Deferred for later
+- [Work that will be done eventually but not in v1]
+
+### Outside this product's identity
+- [Adjacent product we could build but are rejecting — positioning decision, not a deferral]
 
 ## Key Decisions
 - [Decision]: [Rationale]
@@ -79,7 +113,13 @@ topic: <kebab-case-topic>
 - **Lightweight** brainstorms: keep the document compact. Skip document creation when the user only needs brief alignment and no durable decisions need to be preserved
 - For very small requirements docs with only 1-3 simple requirements, plain bullet requirements are acceptable. For Standard and Deep, use stable IDs (R1, R2, R3) so planning and review can refer to them unambiguously
 
-**Grouping rules:** When requirements span multiple distinct concerns, group them under bold topic headers within the Requirements section. Group by logical theme, not discussion order. Requirements keep their original stable IDs -- numbering does not restart per group. Skip grouping only when all requirements are about the same thing.
+**ID format:** Use `R1.`, `A1.`, `F1.`, `AE1.` as a plain prefix at the start of the bullet -- do not bold the ID. R-IDs stay sequential across groups; numbering does not restart per group.
+
+**Grouping rules:** When requirements span multiple distinct concerns, group them under bold topic headers within the Requirements section. Group by logical theme, not discussion order. Skip grouping only when all requirements are about the same thing.
+
+**Size heuristics:**
+- If a capability-named group has only one requirement, ungroup it
+- If total requirements exceed ~15-20, stop and ask whether this is one brainstorm or several
 
 **Outstanding question rules:**
 - Use `Resolve Before Planning` only for questions that truly block planning

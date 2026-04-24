@@ -106,6 +106,8 @@ Run pressure scenario with a subagent WITHOUT the skill. Document:
 - What rationalizations did it use (verbatim)?
 - Which pressures triggered violations?
 
+Force concrete A/B/C choice with real constraints, not open-ended questions.
+
 ### GREEN: Write Minimal Skill
 
 Write skill addressing those specific rationalizations. Run same scenarios WITH skill — agent should now comply.
@@ -113,6 +115,11 @@ Write skill addressing those specific rationalizations. Run same scenarios WITH 
 ### REFACTOR: Close Loopholes
 
 Agent found new rationalization? Add explicit counter. Re-test until bulletproof.
+
+**When agent still fails after reading skill, meta-test:** Ask "You read the skill and chose wrong. How could it be written to make the correct answer crystal clear?" Three diagnostic responses:
+1. "Skill was clear, I ignored it" — add stronger foundational principle
+2. "Skill should have said X" — add X verbatim
+3. "I didn't see section Y" — reorganize for prominence
 
 ## Testing by Skill Type
 
@@ -124,6 +131,8 @@ Agent found new rationalization? Add explicit counter. Re-test until bulletproof
 | **Reference** (docs/APIs) | Retrieval + application + gap testing | Finds and correctly applies information |
 
 ## Bulletproofing Against Rationalization
+
+**Foundational principle:** Violating the letter of the rules is violating the spirit of the rules. State this early in discipline skills — it cuts off the entire "I'm following the spirit" rationalization class.
 
 ### Close Every Loophole Explicitly
 

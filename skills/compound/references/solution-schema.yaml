@@ -24,12 +24,16 @@ tracks:
       - integration-issues
       - logic-errors
   knowledge:
-    description: "Best practices, workflow improvements, patterns, and documentation"
+    description: "Practices, patterns, conventions, decisions, workflow improvements, and documentation"
     categories:
       - best-practices
       - workflow-issues
       - developer-experience
       - documentation-gaps
+      - architecture-patterns
+      - design-patterns
+      - tooling-decisions
+      - conventions
       - patterns
 
 # --- Required fields (both tracks) -----------------------------------------
@@ -55,9 +59,13 @@ required:
       - workflow-issues
       - developer-experience
       - documentation-gaps
+      - architecture-patterns
+      - design-patterns
+      - tooling-decisions
+      - conventions
       # Derived documents
       - patterns
-    description: "Auto-detected from problem context. Maps to .sp-compound/solutions/<category>/ directory."
+    description: "Auto-detected from problem context. Maps to .sp-compound/solutions/<category>/ directory. Prefer the narrowest applicable value; best-practices is the fallback when no narrower knowledge-track category fits."
   track:
     type: string
     enum: [bug, knowledge]

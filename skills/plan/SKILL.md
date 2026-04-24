@@ -60,6 +60,10 @@ If no requirements document exists:
 - Keep the bootstrap brief — it preserves direct-entry convenience, not a full brainstorm replacement
 - If the bootstrap uncovers major unresolved product questions, recommend `sp-compound:brainstorm` again; if the user still wants to continue, require explicit assumptions before proceeding
 
+**Route to a different skill when the bootstrap reveals a mismatch:**
+- **Symptom without known root cause** (broken behavior, no hypothesis yet): announce routing and load `sp-compound:debug`. A plan needs a known problem to solve.
+- **Clear task ready to execute** (known root cause, obvious fix, no architectural decisions): suggest `sp-compound:work` as a faster alternative; the user decides whether to continue planning.
+
 ### 0.5 Scope Check
 If the requirements cover multiple independent subsystems, suggest breaking into separate plans — one per subsystem. Each plan should produce working, testable software on its own.
 
@@ -369,6 +373,7 @@ git commit -m "feat: descriptive message"
 
 ### Plan Rules
 
+- **Task numbering is stable:** Once assigned, Task N numbers are never renumbered. Reordering preserves numbers in place (Task 1, Task 3, Task 5 in the new order is correct — renumbering to 1, 2, 3 is not). Splitting keeps the original number on the original concept and assigns the next unused number to the new task. Deletion leaves a gap; gaps are fine. This matters because deepening, review feedback, and work references cite task numbers across edits.
 - **No Placeholders:** Every step has actual content. No "TBD", "TODO", "implement later", "add tests for above", "add appropriate error handling", "handle edge cases", "similar to Task N" (repeat the code -- the reader may see tasks out of order), steps that describe what to do without showing how, or references to types/functions not defined in any task.
 - **Rejected Alternatives:** The plan header MUST include the Rejected Alternatives table. If only one approach was viable, state why the obvious alternative was ruled out. Implementers and reviewers need this context to avoid re-discovering the same dead ends.
 - **Complete code:** If a step changes code, show the code.
@@ -420,13 +425,14 @@ Read and follow `references/deepening-workflow.md`:
 5. **Research grounding:** Are code blocks based on actual codebase patterns (from repo-research)?
 6. **Path check:** All file paths repo-relative? No absolute paths leaked in?
 7. **Rejected Alternatives:** Does the header include the Rejected Alternatives table with specific reasons?
+8. **Test coverage shape:** For each feature-bearing task, do the tests cover the applicable categories — happy path, edge cases, error/failure paths, and (when the task crosses layers) integration scenarios? Skimping one category is a common failure mode.
 
 **Additional checks for phased Deep plans:**
 
-8. **Interface contract coverage:** Do the contracts cover all cross-module interactions? Any batch task imports a type not defined in the contracts?
-9. **Batch sizing:** Is every batch 3-6 tasks? Oversized batches defeat the purpose of phasing.
-10. **Cross-batch file edits:** Do later batches avoid modifying files created by earlier batches? If unavoidable, do the interface contracts pre-define the extension point?
-11. **Batch summaries:** Does every batch end with a summary (files + key exports)?
+9. **Interface contract coverage:** Do the contracts cover all cross-module interactions? Any batch task imports a type not defined in the contracts?
+10. **Batch sizing:** Is every batch 3-6 tasks? Oversized batches defeat the purpose of phasing.
+11. **Cross-batch file edits:** Do later batches avoid modifying files created by earlier batches? If unavoidable, do the interface contracts pre-define the extension point?
+12. **Batch summaries:** Does every batch end with a summary (files + key exports)?
 
 Fix issues inline. No need to re-review.
 

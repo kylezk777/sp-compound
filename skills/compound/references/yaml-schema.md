@@ -18,12 +18,18 @@ Category determines which directory under `.sp-compound/solutions/` the document
 
 ## Knowledge Track Categories
 
+Prefer the narrowest applicable value. `best-practices` is the fallback when no narrower knowledge-track category fits.
+
 | Category | Directory | Typical Content |
 |----------|-----------|-----------------|
-| best-practices | `.sp-compound/solutions/best-practices/` | Recommended approaches, coding standards, proven patterns |
+| architecture-patterns | `.sp-compound/solutions/architecture-patterns/` | Architectural or structural patterns (agent/skill/pipeline/workflow shape decisions) |
+| design-patterns | `.sp-compound/solutions/design-patterns/` | Reusable non-architectural design approaches (interaction patterns, prompt shapes, content generation) |
+| tooling-decisions | `.sp-compound/solutions/tooling-decisions/` | Language, library, or tool choices with durable rationale |
+| conventions | `.sp-compound/solutions/conventions/` | Team-agreed way of doing something, captured so it survives turnover |
 | workflow-issues | `.sp-compound/solutions/workflow-issues/` | Development workflow improvements, process optimizations |
 | developer-experience | `.sp-compound/solutions/developer-experience/` | Local dev setup, tooling, CI/CD friction, contributor ergonomics |
 | documentation-gaps | `.sp-compound/solutions/documentation-gaps/` | Missing docs, unclear APIs, undocumented behavior |
+| best-practices | `.sp-compound/solutions/best-practices/` | Fallback — use only when no narrower knowledge-track category applies |
 
 ## Derived Documents
 
@@ -46,3 +52,22 @@ Pattern docs live in `.sp-compound/solutions/patterns/` and are DERIVED from mul
 - Reference the specific learnings they're derived from (use `derived_from` in frontmatter)
 - Have `track: knowledge` in frontmatter
 - Are higher-leverage but also higher-risk when stale
+
+## YAML Safety Rules
+
+Strict YAML 1.2 parsers (`yq`, `js-yaml` strict, PyYAML) reject array items that start with a reserved indicator character as unquoted scalars. When writing items for any array-of-strings frontmatter field (`tags`, `related_files`, `applies_when`, `symptoms`, `derived_from`, or any future array field), wrap the value in double quotes if it:
+
+- starts with any of: `` ` ``, `[`, `*`, `&`, `!`, `|`, `>`, `%`, `@`, `?`
+- contains the substring `: ` (confuses flow-style parsers)
+
+Example — before (breaks strict YAML):
+
+    tags:
+      - `rails-console`-specific
+      - fix: edge-case
+
+Example — after (parses cleanly):
+
+    tags:
+      - "`rails-console`-specific"
+      - "fix: edge-case"

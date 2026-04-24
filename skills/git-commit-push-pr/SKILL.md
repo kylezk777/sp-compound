@@ -125,9 +125,10 @@ This frame becomes the opening of the description. For small+simple PRs, the "af
 
 If the user has documented style preferences (in CLAUDE.md, project instructions, or prior feedback), follow those. Otherwise:
 - Active voice throughout. Vary sentence length deliberately.
-- No filler phrases: "it's worth noting", "importantly", "essentially", "in order to".
+- No filler phrases: "it's worth noting", "importantly", "essentially", "in order to", "leverage", "utilize".
 - Use digits for numbers ("3 files"), not words ("three files").
 - Plain English. Technical jargon is fine when it's the clearest term; avoid business jargon.
+- Trust the reader. Do not make a claim and immediately explain it.
 
 ### Writing Principles
 
@@ -139,7 +140,21 @@ If the user has documented style preferences (in CLAUDE.md, project instructions
 - **Test plan only when non-obvious**: edge cases the reviewer might miss, specific setup needed
 - **No `#` prefix on list items**: GitHub auto-links `#1` as an issue reference
 - **No orphaned opening paragraphs**: If the description uses `##` headings anywhere, the opening summary must also be under a heading (e.g., `## Summary`). A bare paragraph followed by titled sections looks like a missing heading.
+- **No Commits section**: GitHub shows commits in its own tab. Omit unless commits need ordering/shipping annotations.
+- **No Review / process section**: Do not describe how to review (checklists, process bullets). Call out non-obvious things to scrutinize inline with the change.
 - **Visual aids**: include Mermaid diagrams or ASCII art only when structurally complex (3+ interacting components, multi-step workflows). Skip for trivial changes. Use `TB` direction for Mermaid so diagrams stay narrow. Prose is authoritative when diagram and text disagree.
+
+### Compression Pass (before applying)
+
+Re-read the composed body once and apply these cuts:
+
+- If any section restates content already in `## Summary`, remove it.
+- If "Testing" or "Test plan" has more than 2 paragraphs, compress to bullets.
+- If the body has 5+ H3 subsections each describing one mechanism, consolidate into a single table. Reserve prose H3 callouts for 2-3 genuine design decisions.
+- If the body exceeds the sizing row's target by more than 30%, compress the longest non-Summary section by half.
+- Large PRs: target ~100 lines, cap ~150. Selectivity, not comprehensiveness.
+
+**Value-lead check**: re-read the first sentence of `## Summary`. If it describes what was moved, renamed, or added ("This PR introduces..."), rewrite to lead with what's now possible or what was broken and is now fixed.
 
 ## Step 6: Create or Update PR
 
@@ -152,7 +167,7 @@ EOF
 ```
 
 ### Existing PR
-Report the PR URL, then ask whether to update the description. If yes, rewrite from scratch based on the full branch diff (not just new commits).
+Report the PR URL, then ask whether to update the description. If yes, rewrite from scratch based on the full branch diff (not just new commits). Before applying, preview: "New title: `<title>` (`<N>` chars). Summary leads with: `<first two sentences>`. Total body: `<L>` lines. Apply?" — the first two sentences of the Summary carry most of the reviewer's attention. On decline, accept steering text and regenerate; do not apply.
 
 ```bash
 gh pr edit --body "$(cat <<'EOF'
