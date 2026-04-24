@@ -115,6 +115,7 @@ This fails because: no pipe-delimited tables, no severity-grouped `###` headers,
   - When bypassed via `mode:no-triage`: `Triage: bypassed (user requested).`
   - When skipped by PR label: `Triage: skipped (PR labeled <match>).`
   - When triager failed: `Triage: failed (reason: <agent-error|timeout|malformed-output>). All findings shown unfiltered.`
+  - When some verdicts were invalidated (missing evidence, low confidence, or red-line-violating DROP): suffix the main line with `(applied N verdicts, M invalidated — missing evidence or low confidence)`.
   - In report-only mode: omit the `Details:` path; append `(artifact suppressed in report-only mode)`.
 - **Summary uses blockquotes** for verdict, reasoning, and fix order
 - **Horizontal rule** (`---`) separates findings from verdict
