@@ -32,6 +32,8 @@ Every reviewer agent produces findings in this JSON format.
 
 **Top-level:** reviewer (string), findings (array), residual_risks (array), testing_gaps (array).
 
+**Post-dedup convention:** After the merge pipeline's Step 3 dedup, the per-finding `reviewer` field MAY be a comma-separated list of contributing reviewer names (e.g., `correctness-reviewer, security-reviewer`). This is the canonical source for cross-reviewer consensus detection in Step 4 (boost) and Step 5.5 (triage red-line). The `evidence` array may carry prefixes identifying which reviewer contributed each item, but consensus is counted from the `reviewer` field.
+
 **Per-finding:** title, severity, file, line, confidence, autofix_class, owner, requires_verification, pre_existing, why_it_matters, evidence (array, at least 1 item).
 
 **Optional per-finding:** suggested_fix (include when fix is obvious and correct; a bad suggestion is worse than none).
@@ -88,3 +90,18 @@ Actively suppress:
 - Code that looks wrong but is intentional (check comments, PR description)
 - Issues already handled elsewhere (callers, guards, middleware)
 - Generic "consider adding" advice without a concrete failure mode
+
+## Post-Triage Fields
+
+The following fields are added by the merge pipeline's Step 5.5 (triage) to findings that pass through the triage stage. Reviewer agents do NOT produce these fields — they are pipeline-added.
+
+| Field | Type | When populated |
+|-------|------|----------------|
+| `triage_verdict` | `KEEP \| DOWNGRADE \| DROP` | Every finding examined by triage |
+| `triage_verdict_reason` | string | Every finding examined |
+| `triage_confidence` | number (0.0–1.0) | Every finding examined |
+| `original_severity` | `P0 \| P1 \| P2 \| P3` | Only when `triage_verdict == DOWNGRADE` was applied; records pre-downgrade severity |
+
+These fields appear only in the triage artifact (`.sp-compound/review-runs/<run-id>/triage.json`), not in the main review report. `DROP`'d findings exist ONLY in the artifact. `DOWNGRADE`'d findings appear in the main report at their new (lower) severity, with the Reviewer column annotated `<reviewer> (<orig>→<new>, triage)`.
+
+See `skills/review/references/triage-rubric.md` for the verdict rubric.

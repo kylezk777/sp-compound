@@ -62,6 +62,7 @@ Use this **exact format** when presenting synthesized review findings. Findings 
 - Suppressed: 2 findings below 0.60 confidence
 - Residual risks: No rate limiting on export endpoint
 - Testing gaps: No test for concurrent export requests
+- Triage: dropped 1 (high-confidence false-positive), downgraded 1. Details: .sp-compound/review-runs/abc123/triage.json
 
 ---
 
@@ -98,7 +99,7 @@ This fails because: no pipe-delimited tables, no severity-grouped `###` headers,
 - **Pipe-delimited markdown tables** for findings -- never ASCII box-drawing characters or per-finding horizontal-rule separators between entries (the report-level `---` before the verdict is still required)
 - **Severity-grouped sections** -- `### P0 -- Critical`, `### P1 -- High`, `### P2 -- Moderate`, `### P3 -- Low`. Omit empty severity levels.
 - **Always include file:line location** for code review issues
-- **Reviewer column** shows which persona(s) flagged the issue. Multiple reviewers = cross-reviewer agreement.
+- **Reviewer column** shows which persona(s) flagged the issue. Multiple reviewers = cross-reviewer agreement. If the finding was downgraded by triage, append ` (<orig>→<new>, triage)` after the reviewer name(s). Example: `correctness (P1→P2, triage)`.
 - **Confidence column** shows the finding's confidence score
 - **Route column** shows the synthesized handling decision as `<autofix_class> -> <owner>`.
 - **Header includes** scope, intent, and reviewer team with per-conditional justifications
@@ -107,10 +108,19 @@ This fails because: no pipe-delimited tables, no severity-grouped `###` headers,
 - **Residual Actionable Work section** -- include only when unresolved actionable findings were handed off
 - **Pre-existing section** -- separate table, no confidence column (informational)
 - **Learnings & Past Solutions section** -- results from learnings-researcher, with links to `.sp-compound/solutions/` files
-- **Coverage section** -- suppressed count, residual risks, testing gaps, failed reviewers
+- **Coverage section** -- suppressed count, residual risks, testing gaps, failed reviewers, and (when triage ran) a triage summary line. Triage line formats:
+  - When triage ran: `Triage: dropped N (high-confidence false-positive), downgraded M. Details: .sp-compound/review-runs/<run-id>/triage.json`
+  - When triage ran but made no changes: `Triage: no changes (examined K findings).`
+  - When skipped by threshold (< 5 findings): omit the triage line entirely
+  - When bypassed via `mode:no-triage`: `Triage: bypassed (user requested).`
+  - When skipped by PR label: `Triage: skipped (PR labeled <match>).`
+  - When triager failed: `Triage: failed (reason: <agent-error|timeout|malformed-output>). All findings shown unfiltered.`
+  - When some verdicts were invalidated (missing evidence, low confidence, or red-line-violating DROP): suffix the main line with `(applied N verdicts, M invalidated — missing evidence or low confidence)`.
+  - In report-only mode: omit the `Details:` path; append `(artifact suppressed in report-only mode)`.
 - **Summary uses blockquotes** for verdict, reasoning, and fix order
 - **Horizontal rule** (`---`) separates findings from verdict
 - **`###` headers** for each section -- never plain text headers
+- **Overflow warning:** When the run's `triage_overflow_warning` flag is true (triage dropped >50% of findings), prepend a single warning line BEFORE the `### P0 -- Critical` header (or the first severity header present). Format exactly: `⚠  Triage dropped >50% of findings in this run. Inspect triage.json before trusting the verdict.` The warning appears in all modes.
 
 ## Headless Mode Format
 

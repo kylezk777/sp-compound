@@ -14,24 +14,31 @@ Dispatch specialized reviewer agents in parallel, merge findings through a quali
 ## Argument Parsing
 
 `$ARGUMENTS` accepts optional tokens (strip recognized tokens before interpreting remainder as PR number, URL, or branch name):
+
+**Primary mode tokens (mutually exclusive):**
 - **`mode:autofix`** — skip user questions, apply safe_auto only
 - **`mode:report-only`** — read-only, no edits, no artifacts, no todos
 - **`mode:headless`** — for skill-to-skill invocation, structured output
+
+**Modifier tokens (compatible with any primary mode):**
+- **`mode:no-triage`** — skip the adversarial triage step (Step 5.5); all findings flow through unchanged
+
+**Other tokens:**
 - **`base:<sha-or-ref>`** — override diff base (do not combine with PR/branch target)
 - **`plan:<path>`** — load specific plan for requirements verification
 
 Default (no tokens): interactive mode.
 
-**Conflicting mode flags:** If multiple mode tokens appear, stop without dispatching agents. Emit error: `Review failed. Reason: conflicting mode flags — <mode_a> and <mode_b> cannot be combined.` (In headless, prefix with `(headless mode)`.)
+**Conflicting mode flags:** If multiple **primary** mode tokens appear (autofix/report-only/headless), stop without dispatching agents. Emit error: `Review failed. Reason: conflicting mode flags — <mode_a> and <mode_b> cannot be combined.` (In headless, prefix with `(headless mode)`.) Modifier tokens like `mode:no-triage` do NOT trigger this rule.
 
 ## Mode Detection
 
 | Mode | When | Behavior |
 |------|------|----------|
-| **Interactive** (default) | No mode token | Review, apply safe_auto, present findings, ask policy decisions on gated/manual |
-| **Autofix** | `mode:autofix` | No interaction. Apply safe_auto only, write residual work, never commit/push/PR |
-| **Report-only** | `mode:report-only` | Read-only. Report only, no edits, no artifacts, no todos, no commit/push/PR. Safe for parallel use. Cannot switch shared checkout. |
-| **Headless** | `mode:headless` | Programmatic. Apply safe_auto (single pass), return structured text output, no todos, never commit/push/PR. Cannot switch shared checkout. End with "Review complete" signal. |
+| **Interactive** (default) | No mode token | Review, apply safe_auto, present findings, ask policy decisions on gated/manual. Triage runs if >= 5 findings. |
+| **Autofix** | `mode:autofix` | No interaction. Apply safe_auto only, write residual work, never commit/push/PR. Triage runs if >= 5 findings. |
+| **Report-only** | `mode:report-only` | Read-only. Report only, no edits, no artifacts, no todos, no commit/push/PR. Triage runs if >= 5 findings but no artifact is written AND DROP verdicts are disabled (downgraded to DOWNGRADE) so findings remain recoverable. Safe for parallel use. Cannot switch shared checkout. |
+| **Headless** | `mode:headless` | Programmatic. Apply safe_auto (single pass), return structured text output, no todos, never commit/push/PR. Triage runs if >= 5 findings. Cannot switch shared checkout. End with "Review complete" signal. |
 
 ### Headless mode guardrails
 - Never use interactive question tools. Infer intent conservatively.
@@ -125,6 +132,8 @@ If found: extract Requirements Trace for completeness check in Stage 6. Record `
 - performance-reviewer — when diff touches DB queries, data transforms, caching, async
 - adversarial-reviewer — when diff exceeds 50 changed executable (non-test/non-generated/non-lockfile) lines, or touches auth, payments, data mutations, external APIs
 
+**Note:** `triage-reviewer` is NOT selected in this stage. It runs in Stage 5.5 against the merged finding list, not against the diff. It is dispatched automatically when the merged new-finding count >= 5 and `mode:no-triage` is absent.
+
 **Plus:** Dispatch `learnings-researcher` agent to search `.sp-compound/solutions/` for related past issues.
 
 **File-type awareness:** Instruction-prose files (Markdown, JSON schemas, config) do not benefit from runtime-focused reviewers. Count only executable code lines toward line-count thresholds. For diffs that only change prose files, skip adversarial unless the prose describes auth, payment, or data-mutation behavior.
@@ -162,10 +171,27 @@ Read and follow `references/merge-pipeline.md`.
 3.5. **Pre-existing detection** — git blame to separate pre-existing from new findings
 4. **Cross-reviewer boost** — 2+ reviewers on same issue → +0.10 confidence (cap 1.0)
 5. **Resolve disagreements** — annotate when reviewers disagree on severity/route. Keep most conservative.
+5.5. **Adversarial triage** — dispatch `triage-reviewer` when >= 5 new findings and `mode:no-triage` is absent. Emits KEEP/DOWNGRADE/DROP verdicts with hard recall safety rails (see Stage 5.5 below).
 6. **Route** — set final autofix_class, owner, requires_verification. Never widen without evidence.
 7. **Partition** — fixer queue (safe_auto -> review-fixer), residual actionable (gated_auto/manual -> downstream-resolver), report-only (advisory + human/release)
 8. **Sort** — severity → confidence → file → line
 9. **Coverage** — union residual_risks and testing_gaps across reviewers
+
+## Stage 5.5: Adversarial Triage (conditional)
+
+When the merged new-finding count (after Step 5, excluding pre-existing) is >= 5 AND `mode:no-triage` is NOT set, dispatch the `triage-reviewer` agent per `references/merge-pipeline.md` Step 5.5.
+
+The triage-reviewer reads `references/triage-rubric.md` and emits KEEP / DOWNGRADE / DROP verdicts per finding. The pipeline validates each verdict (confidence gates, evidence anchoring, hard red-lines for P0 / cross-reviewer consensus / sensitive paths) before applying. Failed validations revert the verdict to KEEP.
+
+**Model tier:** triage-reviewer runs at the highest tier available (NOT mid-tier) — the agent must reason counterfactually about reachability and containment. Override the default reviewer model tier when dispatching this agent.
+
+**PR-label bypass:** if PR title/body/labels contain `hotfix`, `security`, `cve`, `p0`, or `p1-prod` (case-insensitive), skip the step entirely; all findings flow through unchanged.
+
+**Fail-open:** triager failure (error/timeout/malformed output) is treated as a no-op. All findings pass through at their original severity. The review does NOT abort.
+
+**Artifact:** full triage detail (verdicts, rationale, reverted verdicts) writes to `.sp-compound/review-runs/<run-id>/triage.json` in interactive, autofix, and headless modes. Report-only mode honors its "no artifacts" contract and skips artifact write.
+
+See `references/merge-pipeline.md` Step 5.5 and `references/triage-rubric.md` for the full rules.
 
 ## Stage 6: Report
 
@@ -215,7 +241,10 @@ Scope: <scope>
 Intent: <intent>
 Reviewers: <list>
 Verdict: <Ready to merge | Ready with fixes | Not ready>
+Triage: <dropped N (high-confidence false-positive), downgraded M. Details: <path> | no changes (examined K findings) | skipped (PR labeled <match>) | bypassed (user requested) | failed (reason: <reason>). All findings shown unfiltered | not run (< 5 findings)>
 Artifact: .sp-compound/review-runs/<run-id>/
+
+(If triage dropped > 50% of findings, prepend the line `⚠  Triage dropped >50% of findings in this run. Inspect triage.json before trusting the verdict.` as the very first line of the envelope.)
 
 Applied N safe_auto fixes.
 
@@ -320,11 +349,14 @@ Autofix, report-only, headless: stop after report and residual handoff. Never co
 
 **Dispatches:**
 - Review agents: correctness, testing, security (conditional), performance (conditional), adversarial (conditional)
+- triage-reviewer (conditional, Stage 5.5; uses highest model tier, not mid-tier)
 - learnings-researcher agent (always)
 
 **Consumes:**
 - `references/findings-schema.md` -- output format contract
-- `references/merge-pipeline.md` -- merge rules
+- `references/merge-pipeline.md` -- merge rules (includes Step 5.5 triage)
 - `references/diff-scope.md` -- scope classification rules for reviewers
 - `references/resolve-base.sh` -- base branch detection script (fork-safe)
+- `references/triage-rubric.md` -- triage verdict rubric (Stage 5.5)
+- `references/triage-test-scenarios.md` -- triage regression fixtures
 - `.sp-compound/solutions/` -- via learnings-researcher for historical context
