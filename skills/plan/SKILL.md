@@ -383,6 +383,7 @@ git commit -m "feat: descriptive message"
 - **Execution notes:** Every task gets an execution note (test-first is default).
 - **Requirements trace:** Every task links back to requirement IDs.
 - **Learnings attribution:** Cite .sp-compound/solutions/ when the approach is informed by history.
+- **Tangential cleanup goes to Deferred to Separate Tasks:** If research surfaces an adjacent refactor, a "while we're here" cleanup, or a scope-adjacent nice-to-have that is not part of the user's confirmed scope, route it to `### Deferred to Separate Tasks`, not into active tasks. The user's explicit ask overrides this default — if they asked for the refactor, it's in-scope.
 
 ## Phase 4: Confidence Deepening (Standard/Deep plans only)
 
@@ -426,13 +427,14 @@ Read and follow `references/deepening-workflow.md`:
 6. **Path check:** All file paths repo-relative? No absolute paths leaked in?
 7. **Rejected Alternatives:** Does the header include the Rejected Alternatives table with specific reasons?
 8. **Test coverage shape:** For each feature-bearing task, do the tests cover the applicable categories — happy path, edge cases, error/failure paths, and (when the task crosses layers) integration scenarios? Skimping one category is a common failure mode.
+9. **Origin coverage (when requirements doc exists):** Re-scan each section of the origin requirements doc — not just R-IDs — to verify nothing was silently dropped. Scope boundaries, rejected alternatives, and domain constraints from the brainstorm must all appear somewhere in the plan (addressed, carried forward, or explicitly deferred).
 
 **Additional checks for phased Deep plans:**
 
-9. **Interface contract coverage:** Do the contracts cover all cross-module interactions? Any batch task imports a type not defined in the contracts?
-10. **Batch sizing:** Is every batch 3-6 tasks? Oversized batches defeat the purpose of phasing.
-11. **Cross-batch file edits:** Do later batches avoid modifying files created by earlier batches? If unavoidable, do the interface contracts pre-define the extension point?
-12. **Batch summaries:** Does every batch end with a summary (files + key exports)?
+10. **Interface contract coverage:** Do the contracts cover all cross-module interactions? Any batch task imports a type not defined in the contracts?
+11. **Batch sizing:** Is every batch 3-6 tasks? Oversized batches defeat the purpose of phasing.
+12. **Cross-batch file edits:** Do later batches avoid modifying files created by earlier batches? If unavoidable, do the interface contracts pre-define the extension point?
+13. **Batch summaries:** Does every batch end with a summary (files + key exports)?
 
 Fix issues inline. No need to re-review.
 

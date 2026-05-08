@@ -97,7 +97,7 @@ The skills chain automatically:
 
 When multiple skills could apply:
 
-1. **Process skills first** (brainstorm) — determine HOW to approach
+1. **Process skills first** (brainstorm, debug) — determine HOW to approach
 2. **Implementation skills second** (work, flexible-tdd) — guide execution
 
 "Let's build X" -> brainstorm first, then plan, then work.

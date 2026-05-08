@@ -12,11 +12,12 @@ The requirements document is for product definition and scope control. Do **not*
 
 | Section | Lightweight | Standard / Deep-feature | Deep-product |
 |---|---|---|---|
+| Summary | Optional (skip if Requirements bullets are already the summary) | Required (1-3 line forward-looking prose) | Required (1-3 line forward-looking prose) |
 | Problem Frame | Required | Required | Required |
 | Actors (A-IDs) | Omit unless triggered | Triggered | Triggered |
 | Key Flows (F-IDs) | Omit unless triggered | Triggered | Expected by default |
 | Requirements (R-IDs) | Required | Required | Required |
-| Acceptance Examples (AE-IDs) | Omit unless triggered | Triggered | Triggered |
+| Acceptance Examples (AE-IDs) | Required for conditional requirements; otherwise omit unless triggered | Required for conditional requirements; otherwise triggered | Required for conditional requirements; otherwise triggered |
 | Success Criteria | Required | Required | Required |
 | Scope Boundaries | Single list | Single list | Split: "Deferred for later" + "Outside this product's identity" |
 | Key Decisions | When material | When material | When material |
@@ -24,10 +25,12 @@ The requirements document is for product definition and scope control. Do **not*
 | Outstanding Questions | When material | When material | When material |
 | Next Steps | Required | Required | Required |
 
+**Summary vs Problem Frame discipline.** Summary answers "what is this doc proposing?" (forward-looking, 1-3 lines); Problem Frame answers "why does this proposal exist?" (backward-looking, paragraphs). Problem Frame must not restate the proposal -- if its last sentence names what is being built, cut it; Summary above already covers it.
+
 **Triggered sections — when to include**
 - **Actors** — multiple humans, agents, or systems are meaningfully involved, or decisions change by whose perspective is optimized for.
 - **Key Flows** — work involves multi-step interaction or coordinates across existing flows.
-- **Acceptance Examples** — a requirement's behavior is hard to pin down without a concrete scenario; each example back-references `Covers: R-IDs`.
+- **Acceptance Examples** — always include AEs covering behavioral-conditional requirements (framed as "When X, Y" or "If X, Y") -- conditional framing signals state-dependent behavior where prose alone leaves implicit ambiguity. For other requirements, include when behavior is hard to pin down without a concrete scenario. Each example back-references `Covers: R-IDs`.
 
 **Document template** (omit clearly inapplicable optional sections):
 
@@ -39,8 +42,11 @@ topic: <kebab-case-topic>
 
 # <Topic Title>
 
+## Summary
+[1-3 line forward-looking prose: what this doc is proposing, in plain language. Required for Standard / Deep; Lightweight may skip when Requirements bullets are already the summary.]
+
 ## Problem Frame
-[Who is affected, what is changing, and why it matters]
+[Who is affected, what is changing, and why it matters. Backward-looking / situational -- does NOT restate the proposal (that lives in Summary).]
 
 ## Actors
 [Include when triggered. Stable A-IDs.]

@@ -416,6 +416,46 @@ Differences evaluated and explicitly rejected during self-improve runs. Recorded
 **Rejection reason:** Out of scope — reproduce-bug has no fix phase
 **Re-evaluate if:** Never — architectural
 
+### [2026-05-08] reproduce-bug: Assumption audit
+
+**Source:** CE (ce-debug Phase 2)
+**What upstream has:** Explicit "list the beliefs your understanding depends on, mark each verified/assumed" step before hypothesis formation
+**sp-compound approach:** reproduce-bug only forms 2-3 initial hypotheses to direct reproduction; deep hypothesis scaffolding belongs in sp-compound:debug
+**Rejection reason:** Belongs in sp-compound:debug. Same rationale as detailed prediction-quality examples — principles #1, #2
+**Re-evaluate if:** sp-compound:debug loses assumption-audit guidance
+
+### [2026-05-08] reproduce-bug: Environment sanity verification checklist
+
+**Source:** CE (ce-debug Phase 1.2)
+**What upstream has:** Full checklist before tracing — branch, dependencies installed, runtime version, env vars, stale build artifacts, local services
+**sp-compound approach:** Phase 3 "If reproduction fails" already notes "Check for environment-specific factors — differences between environments IS the investigation"
+**Rejection reason:** Existing coverage adequate; expanding into a full framework-neutral-but-still-long checklist violates principle #1
+**Re-evaluate if:** Users repeatedly miss env-level causes during reproduction
+
+### [2026-05-08] reproduce-bug: Bug-class pattern checklist
+
+**Source:** CE (ce-debug investigation-techniques.md)
+**What upstream has:** Pre-trace checklist (time/timezone, encoding, floating-point, off-by-one, cache staleness, permissions, version drift, path/case, concurrency, stale artifacts, TOCTOU)
+**sp-compound approach:** reproduce-bug forms hypotheses from issue symptoms and code search; deep hypothesis scaffolding belongs in sp-compound:debug
+**Rejection reason:** Belongs in sp-compound:debug (hypothesis-quality aid). Principles #1, #2
+**Re-evaluate if:** sp-compound:debug loses pattern-checklist coverage
+
+### [2026-05-08] reproduce-bug: Parallel sub-agent investigation
+
+**Source:** CE (ce-debug Phase 2)
+**What upstream has:** Dispatch read-only sub-agents in parallel when hypotheses are evidence-bottlenecked across independent subsystems
+**sp-compound approach:** reproduce-bug is intake + reproduction only; deep multi-hypothesis investigation belongs in sp-compound:debug
+**Rejection reason:** Out of scope. Principles #1, #2
+**Re-evaluate if:** Never — architectural
+
+### [2026-05-08] reproduce-bug: Adopting ce-report-bug (external plugin-bug intake)
+
+**Source:** CE (ce-report-bug skill)
+**What upstream has:** Dedicated skill for plugin users to file bug reports against the compound-engineering plugin itself (structured Q&A + gh issue create)
+**sp-compound approach:** reproduce-bug investigates bugs in the user's codebase from issue trackers; ce-report-bug's purpose (reporting bugs against the plugin itself) is an unrelated capability
+**Rejection reason:** Different skill purpose — not a reproduce-bug comparison point. If sp-compound wants user-facing plugin-bug reporting, it would be a new skill, not a reproduce-bug change
+**Re-evaluate if:** Users request a sp-compound:report-bug skill; at that point treat as a new skill, not reproduce-bug
+
 ### [2026-04-12] writing-skills: anthropic-best-practices.md (1100+ lines)
 
 **Source:** SP
@@ -695,3 +735,331 @@ Differences evaluated and explicitly rejected during self-improve runs. Recorded
 **sp-compound approach:** Creation step 5 already instructs "Flag modified configs for manual review" — the resolution path is already documented at the point it applies
 **Rejection reason:** Restates guidance already present in the creation step. Principle #1
 **Re-evaluate if:** Creation step 5 stops mentioning manual review
+
+### [2026-05-08] flexible-tdd: SP "Violating the letter is violating the spirit" principle line
+
+**Source:** SP
+**What upstream has:** Overview reinforcer line: "Violating the letter of the rules is violating the spirit of the rules."
+**sp-compound approach:** Common Rationalizations table already addresses "It's about spirit not ritual" and Red Flags list repeats it; Strategy 1 opens with "Thinking 'skip TDD just this once'? Stop. That's rationalization."
+**Rejection reason:** Redundant — the spirit-vs-letter dodge is already closed at two stronger points (table row + red flag). Adding a third is prose padding. Principle #1
+**Re-evaluate if:** The table row and red flag both get removed
+
+### [2026-05-08] flexible-tdd: SP "Test hard = design unclear" rationalization row
+
+**Source:** SP
+**What upstream has:** Row in Common Rationalizations: "Test hard = design unclear | Listen to test. Hard to test = hard to use."
+**sp-compound approach:** When Stuck table already has "Test too complicated | Design too complicated. Simplify interface." plus "Must mock everything | Code too coupled. Use dependency injection."
+**Rejection reason:** Same guidance expressed in the action-oriented When Stuck table where the agent actually lands when stuck. Adding to the rationalization table duplicates with weaker framing. Principle #1
+**Re-evaluate if:** When Stuck table loses the complexity/coupling rows
+
+### [2026-05-08] flexible-tdd: SP anti-patterns ❌/✅ emoji markers + "your human partner's correction" quotes
+
+**Source:** SP (testing-anti-patterns.md)
+**What upstream has:** ❌/✅ emoji prefixes on code blocks and "your human partner's correction: '...'" / "your human partner's question: '...'" callout quotations
+**sp-compound approach:** Plain BAD/GOOD labels, no persona quotations
+**Rejection reason:** Emoji markers are cosmetic (no agent decision changes); persona quotations are user-specific idiom akin to the already-rejected Circle K phrase. Principles #1, #3
+**Re-evaluate if:** Never
+
+### [2026-05-08] flexible-tdd: SP anti-patterns expanded Gate Function pseudocode blocks
+
+**Source:** SP (testing-anti-patterns.md)
+**What upstream has:** Multi-line `BEFORE ... IF ... STOP` pseudocode blocks (plus nested "Red flags" and "If unsure" branches) for each anti-pattern's Gate section
+**sp-compound approach:** One- or two-sentence prose Gate after each anti-pattern carrying the same question + action ("Before X, ask Y. If Z — do W.")
+**Rejection reason:** Prose Gates already convey the single decision the agent needs; the pseudocode wrapper adds structure without adding a new decision point. Principle #1
+**Re-evaluate if:** Agents are skipping gates because prose is missed in dense reads
+
+### [2026-05-08] flexible-tdd: SP anti-patterns "class owns resource lifecycle" second gate
+
+**Source:** SP (testing-anti-patterns.md, Anti-Pattern 2)
+**What upstream has:** Second gate question "Does this class own this resource's lifecycle? IF no: STOP — Wrong class for this method"
+**sp-compound approach:** Single gate "Is this only used by tests? If yes — put it in test utilities"
+**Rejection reason:** The lifecycle-ownership check is a broader design concern (wrong-class placement for production code), not a testing anti-pattern. Expanding this file's scope conflicts with its stated purpose. Principle #1
+**Re-evaluate if:** sp-compound adds a dedicated design-boundaries reference that would be the proper home for this check
+
+### [2026-05-08] plan: Solo + Brainstorm-sourced synthesis checkpoints (Phase 0.7 / 5.1.5)
+
+**Source:** CE
+**What upstream has:** Two chat-time three-bucket (Stated/Inferred/Out) scope checkpoints before and after research, with a full `references/synthesis-summary.md` discipline file, soft-cut blocking, and headless-mode `## Assumptions` routing
+**sp-compound approach:** Phase 0 ingests the brainstorm requirements doc directly; Phase 2 resolves planning questions; Phase 5.1 self-reviews coverage. No chat-time scope checkpoint — brainstorm owns scope validation, plan owns implementation shape.
+**Rejection reason:** Heavy ceremony (one full reference file, soft-cut state, bucket routing) for a job the sp-compound workflow chain already does via the brainstorm->plan handoff. Adding synthesis checkpoints reopens scope-resolution at plan time, blurring the brainstorm/plan boundary. Principles #1, #2
+**Re-evaluate if:** Users report scope drift between brainstorm and plan, or solo (no-brainstorm) invocations consistently produce mis-scoped plans
+
+### [2026-05-08] plan: ## Summary and ## Problem Frame template split
+
+**Source:** CE
+**What upstream has:** Dedicated forward-looking `## Summary` + backward-looking `## Problem Frame` template sections, each with strict content rules
+**sp-compound approach:** Single `**Goal:**` one-liner + `**Architecture:**` 2-3 sentence summary in the plan header
+**Rejection reason:** sp-compound's Goal/Architecture header already carries the forward-looking summary; Problem Frame content (the "why") lives in the origin requirements doc and is referenced via the `origin:` frontmatter field. Duplicating it in the plan violates Principle #1 and creates drift risk against the origin doc
+**Re-evaluate if:** Plans without an origin doc prove hard to read because the "why" is missing
+
+### [2026-05-08] plan: ## Assumptions section for headless mode
+
+**Source:** CE
+**What upstream has:** Dedicated `## Assumptions` section that captures un-validated agent inferences when the skill runs non-interactively (LFG / disable-model-invocation contexts)
+**sp-compound approach:** No headless/pipeline mode; interactive by design. Assumptions in sp-compound plans are captured inline as part of Key Technical Decisions or deferred questions, user-corrected in chat
+**Rejection reason:** No pipeline mode in sp-compound (already rejected 2026-04-12). Without non-interactive runs, there is no class of un-validated bets needing a separate audit surface. Principle #2
+**Re-evaluate if:** sp-compound adds a pipeline/automation mode
+
+### [2026-05-08] plan: Artifact-backed deepening mode (scratch dir, per-agent files)
+
+**Source:** CE
+**What upstream has:** Optional `mode:artifact-backed` for deepening — create per-run scratch dir via `mktemp`, have each sub-agent write one compact artifact file, return only a summary, cleanup after synthesis
+**sp-compound approach:** Direct-mode dispatch only — sub-agents return findings inline; deepening gate caps at top 2-5 sections with max ~8 agents total
+**Rejection reason:** sp-compound's deepening budget is already capped low (~8 agents max) and direct-mode returns fit in context without disk I/O. Artifact-backed mode exists to manage CE's higher agent counts and its write-failure / malformed-artifact / cleanup-skipped paths — failure modes not present at sp-compound scale. Principles #1, #3
+**Re-evaluate if:** sp-compound deepening routinely dispatches 6+ agents with bulky source-backed returns
+
+### [2026-05-08] plan: NNN sequence number + type in filename
+
+**Source:** CE
+**What upstream has:** `docs/plans/YYYY-MM-DD-NNN-<type>-<name>-plan.md` with zero-padded 3-digit sequence and `<type>` prefix (`feat`/`fix`/`refactor`)
+**sp-compound approach:** `.sp-compound/plans/YYYY-MM-DD-<feature-name>-plan.md`; `type` lives in YAML frontmatter
+**Rejection reason:** Cosmetic naming convention; sp-compound typically produces at most one plan per topic per day, so multi-plan-per-day collisions are rare and already handled by the descriptive name. Adding NNN + type prefix bloats filenames without changing agent behavior. Principle #1
+**Re-evaluate if:** Users report frequent same-day filename collisions in practice
+
+### [2026-05-08] plan: ce-doc-review skill as mandatory post-write gate
+
+**Source:** CE
+**What upstream has:** Mandatory `ce-doc-review mode:headless <plan-path>` after plan write — even when the confidence check passed; headless envelope drives the post-generation menu summary; 5-option Proof-integrated menu
+**sp-compound approach:** Inline Phase 5.1 self-review checklist; no separate doc-review skill
+**Rejection reason:** sp-compound's inline checklist already covers the classes of issues CE's doc-review catches (placeholders, trace gaps, test coverage, path hygiene) without a second skill dispatch. Adding a mandatory sub-skill call conflicts with Principle #1 and creates a new review-plan skill maintenance surface
+**Re-evaluate if:** Users report plan-quality issues the inline checklist misses that a dedicated reviewer would catch
+
+### [2026-05-08] plan: Core Principles list (8 numbered principles in SKILL.md body)
+
+**Source:** CE
+**What upstream has:** Top-level `## Core Principles` section with 8 numbered items (source-of-truth, decisions-not-code, research-before-structuring, right-size, separate planning from execution, portability, execution-posture lightness, honor user-named resources)
+**sp-compound approach:** Single `## Core Principle` one-liner ("research ensures code blocks are grounded in reality") with behavioral rules inlined in each phase
+**Rejection reason:** sp-compound already enforces these behaviors through phase instructions; listing them as prose principles duplicates the phase rules without changing agent decisions. Several CE principles (decisions-not-code, honor user-named resources) are also individually rejected. Principle #1
+**Re-evaluate if:** Reviewers report agent behavior inconsistent with a listed principle that phase rules do not already cover
+
+### [2026-05-08] plan: Stakeholder and Impact Awareness prose section
+
+**Source:** CE (Phase 3.2)
+**What upstream has:** Standing instruction to briefly consider who is affected by the change (end users, developers, operations, other teams) and note affected parties in System-Wide Impact
+**sp-compound approach:** Requirements trace + Risks & Dependencies fields already capture relevant cross-team impact; plans do not include a System-Wide Impact template section (already rejected 2026-04-22)
+**Rejection reason:** Without a System-Wide Impact section to anchor it, the stakeholder prose has no destination inside the plan template. Adding the section would reopen an already-rejected item. Principle #1
+**Re-evaluate if:** sp-compound adopts a System-Wide Impact section
+
+### [2026-05-08] git-worktree: SP default-to-`.worktrees/` (no user ask)
+
+**Source:** SP (using-git-worktrees)
+**What upstream has:** When nothing is declared and no existing dir is found, SP skips the ask and defaults to `.worktrees/` at project root, then verifies/commits .gitignore
+**sp-compound approach:** Directory Selection Step 3 asks the user to choose between `.worktrees/` (project-local) and `~/worktrees/<project>/` (global) when no existing dir / CLAUDE.md preference exists
+**Rejection reason:** Explicit consent on first-time directory placement is a deliberate UX choice — global vs project-local is a per-user preference that persists across the project's lifetime, and silently defaulting would commit `.gitignore` changes without the user knowing global-path was an option. Principle #7 (protect unique improvement); one extra turn is cheap vs wrong-default churn
+**Re-evaluate if:** Users report the ask friction is disruptive, OR sp-compound drops global-path support
+
+### [2026-05-08] git-worktree: SP backward-compat `~/.config/superpowers/worktrees/` legacy path
+
+**Source:** SP (using-git-worktrees)
+**What upstream has:** Directory-selection probes `~/.config/superpowers/worktrees/<project>` as a step for backward compatibility with legacy SP installs
+**sp-compound approach:** Generic `~/worktrees/<project>/` option offered to user; no superpowers-branded path
+**Rejection reason:** Out of scope — sp-compound has no install-history of that path, so no user would have it. Principle #3 (agnostic) and #6 (three-way parity: "upstream has it" is not a reason)
+**Re-evaluate if:** sp-compound users migrating from SP report losing their legacy worktree directories
+
+### [2026-05-08] git-worktree: SP separate "Common Mistakes" section
+
+**Source:** SP (using-git-worktrees)
+**What upstream has:** Dedicated Common Mistakes section with problem/fix pairs (Fighting the harness, Skipping detection, Skipping ignore verification, Assuming directory location, Proceeding with failing tests)
+**sp-compound approach:** Red Flags Never/Always lists + Quick Reference table cover the same anti-patterns more concisely, and Step 0 + Prefer Native Tools now cover harness-fighting and nested-worktree cases directly
+**Rejection reason:** Redundant with existing Red Flags + Quick Reference. Principle #1 (conciseness) and #5 (tables/checklists over prose)
+**Re-evaluate if:** Red Flags stops covering anti-patterns explicitly
+
+### [2026-05-08] compound: "What It Captures / What It Creates / Compounding Philosophy" prose sections
+
+**Source:** CE
+**What upstream has:** Three motivational prose sections (~40 lines) explaining compounding metaphor, feedback loop ASCII diagram, and enumerated captured fields
+**sp-compound approach:** Overview one-paragraph tagline + concise Phase/Integration tables
+**Rejection reason:** Verbose human-motivational prose with no agent decision. Principles #1, #5
+**Re-evaluate if:** Never — agent-first design
+
+### [2026-05-08] compound: Auto-Invoke trigger-phrases block
+
+**Source:** CE
+**What upstream has:** `<auto_invoke>` block listing "that worked", "it's fixed", "working now", "problem solved" trigger phrases
+**sp-compound approach:** `description` frontmatter field handles invocation ("Use after solving a notable problem...")
+**Rejection reason:** Redundant with description field. Adding trigger phrases increases false-positive auto-trigger rate on casual conversation. Principle #1
+**Re-evaluate if:** sp-compound loses description-based auto-invocation
+
+### [2026-05-08] compound: Pre-resolved git branch via `!` bash expansion
+
+**Source:** CE
+**What upstream has:** `!`git rev-parse --abbrev-ref HEAD`` at skill load, passed to Session Historian
+**sp-compound approach:** No pre-resolved block — the only downstream consumer (Session Historian) is rejected
+**Rejection reason:** Dead pre-resolution — no consumer in sp-compound reads it. Parallels git-commit-push-pr `!` rejection 2026-04-22 (plugin-wide consistency). Principles #1, #2
+**Re-evaluate if:** sp-compound adopts a Session-Historian-like agent needing git-branch context
+
+### [2026-05-08] compound: `mkdir -p` shell step in Phase 2 assembly
+
+**Source:** CE
+**What upstream has:** Explicit `mkdir -p docs/solutions/[category]/` shell command in Phase 2
+**sp-compound approach:** "Create the directory and the relevant category subdirectory" — handled by native Write tool auto-creating parents
+**Rejection reason:** Cosmetic / tooling-specific. sp-compound agents use Write with auto-parent-creation. Principle #1
+**Re-evaluate if:** Never — tooling choice
+
+### [2026-05-08] compound-refresh: Long description with trigger-phrase catalog
+
+**Source:** CE
+**What upstream has:** ~200-word description listing trigger phrases ("refresh my learnings", "audit docs/solutions/", etc.) to drive model auto-invocation
+**sp-compound approach:** `disable-model-invocation: true` frontmatter — compound-refresh is invoked by user or by `sp-compound:compound` Phase 2.5, not via pattern matching
+**Rejection reason:** Different invocation model by design. Flipping to CE's pattern would require removing disable-model-invocation and risk spurious triggers on conversational phrases. Principle #7
+**Re-evaluate if:** sp-compound removes disable-model-invocation from compound-refresh
+
+### [2026-05-08] compound/compound-refresh: Schema framework-specific component + root_cause enums
+
+**Source:** CE
+**What upstream has:** `component` enum (rails_model, hotwire_turbo, brief_system, …) and `root_cause` enum (missing_association, thread_violation, …) in schema.yaml
+**sp-compound approach:** `component` is a free-form optional string; no root_cause enum; bug-track fields kept framework-agnostic
+**Rejection reason:** Framework-specific (Rails vocabulary baked into enums). Parallels already-logged 2026-04-12 schema-design rejection; re-confirmed for this run. Principle #3
+**Re-evaluate if:** Never — fundamental design choice
+
+### [2026-05-08] compound/compound-refresh: ToolSearch AskUserQuestion preload protocol
+
+**Source:** CE
+**What upstream has:** "call ToolSearch with select:AskUserQuestion first if schema isn't loaded" micro-instructions repeated throughout both skills
+**sp-compound approach:** Plain "use the platform's blocking question tool when available, otherwise numbered options"
+**Rejection reason:** Platform-specific verbosity; parallels plan/brainstorm rejections 2026-04-22. Principle #1
+**Re-evaluate if:** Claude Code schema loading becomes a common failure mode
+
+### [2026-05-08] compound: CE resolution-template section renames
+
+**Source:** CE (assets/resolution-template.md)
+**What upstream has:** Section order Problem / Symptoms / What Didn't Work / Solution / Why This Works / Prevention / Related Issues
+**sp-compound approach:** Problem / Root Cause / Failed Attempts / Solution / Prevention / Related Issues (Root Cause promoted, Why-This-Works folded into Root Cause + Solution)
+**Rejection reason:** Equivalent structure with minor ordering differences; changing would cascade across all existing .sp-compound/solutions/ docs. Principles #1, #2
+**Re-evaluate if:** Never — cosmetic section ordering
+
+### [2026-05-08] compound-refresh: CE "2-option Full vs Lightweight" prompt at start
+
+**Source:** CE
+**What upstream has:** Explicit blocking prompt for Full vs Lightweight mode at skill start
+**sp-compound approach:** Mode Detection from `$ARGUMENTS` (interactive default, mode:autofix, mode:autonomous) — no start-of-session prompt
+**Rejection reason:** Already rejected for compound 2026-04-12 (auto-proceed-to-full); same rationale applies to compound-refresh. Principle #5
+**Re-evaluate if:** Never — architectural
+
+### [2026-05-08] debug: SP pointer to condition-based-waiting-example.ts inside condition-based-waiting.md
+
+**Source:** SP
+**What upstream has:** Line "See `condition-based-waiting-example.ts` in this directory for complete implementation..." following the generic polling function
+**sp-compound approach:** The example file itself was rejected 2026-04-12 (framework-specific TypeScript for the Lace project); the pointer is therefore dead text
+**Rejection reason:** Consistent with the already-rejected example file — pointing at a file sp-compound doesn't ship is dead text. Principles #1, #3
+**Re-evaluate if:** Never — the example file itself is permanently rejected
+
+### [2026-05-08] receiving-review: CE "Agent time is cheap. Tech debt is expensive." framing quote
+
+**Source:** CE (ce-resolve-pr-feedback)
+**What upstream has:** Motivational preamble quote above the "Fix everything valid" policy
+**sp-compound approach:** Functional instruction only
+**Rejection reason:** Motivational prose — policy line already changes behavior; quote adds no decision value. Principle #1
+**Re-evaluate if:** Never — already covered by functional instruction
+
+### [2026-05-08] receiving-review: CE full PR-resolve automation (re-confirmed)
+
+**Source:** CE (ce-resolve-pr-feedback)
+**What upstream has:** GraphQL scripts, parallel agent dispatch, cross-invocation cluster analysis, triage/actionability filters, iteration gate, combined-state validation
+**sp-compound approach:** receiving-review is behavioral/mindset; no automation skill exists
+**Rejection reason:** Re-confirmed from 2026-04-22. Different scope — would require a separate skill. Scripts conflict with scriptless design. Principle #1
+**Re-evaluate if:** User demand for dedicated PR-resolution automation
+
+### [2026-05-08] review: `metadata.json` sidecar in run artifact
+
+**Source:** CE (ce-code-review)
+**What upstream has:** Per-run `metadata.json` sidecar with branch/HEAD/commit info next to the findings JSON artifact
+**sp-compound approach:** Single `triage.json` artifact, no metadata sidecar
+**Rejection reason:** No downstream consumer — triage.json is read only by the same-run report renderer; `.sp-compound/solutions/` is written by compound, not review. Principle #1 (don't emit signals nothing reads)
+**Re-evaluate if:** sp-compound adds a programmatic downstream consumer needing branch/HEAD verification
+
+### [2026-05-08] review: SP "Strengths" acknowledgment section in output
+
+**Source:** SP (requesting-code-review)
+**What upstream has:** Section praising what's done well before listing findings
+**sp-compound approach:** Severity-grouped findings + verdict blockquote; no strengths section
+**Rejection reason:** Cosmetic — doesn't change agent behavior or verdict routing. Principle #1
+**Re-evaluate if:** Never — cosmetic
+
+### [2026-05-08] review: SP "Push back if reviewer is wrong" guidance inline
+
+**Source:** SP (requesting-code-review)
+**What upstream has:** Inline guidance telling the review-consumer to push back if a finding is wrong
+**sp-compound approach:** Quality-gate #2 ("No false positives from skimming") plus dedicated `sp-compound:receiving-review` skill
+**Rejection reason:** Equivalent coverage via quality gate + separate skill. Inline guidance duplicates. Principle #1
+**Re-evaluate if:** receiving-review skill loses push-back framing
+
+### [2026-05-08] review: CE project-standards / stack-specific reviewers added to always-on set
+
+**Source:** CE (ce-code-review)
+**What upstream has:** CLAUDE.md/AGENTS.md compliance + stack-specific personas in always-on reviewer set
+**sp-compound approach:** 5+2 lean reviewer set; project-standards compliance absorbed into correctness reviewer when relevant
+**Rejection reason:** Hard rule — preserve 5+2. Widening the always-on set dilutes signal and increases cost. If needed later, absorb into existing persona. Principle #7
+**Re-evaluate if:** Evidence that project-standards compliance is routinely missed by current correctness reviewer
+
+### [2026-05-08] finishing-branch: SP expanded Option 4 confirmation template
+
+**Source:** SP (finishing-a-development-branch)
+**What upstream has:** Multi-line confirmation block spelling out branch/commits/worktree/"Type 'discard'"
+**sp-compound approach:** Single instruction listing the same required fields
+**Rejection reason:** Equivalent coverage; template form adds ~10 lines without behavior change. Principle #1
+**Re-evaluate if:** Users report missing fields in Option 4 confirmations
+
+### [2026-05-08] finishing-branch: SP standalone "Common Mistakes" section
+
+**Source:** SP (finishing-a-development-branch)
+**What upstream has:** Dedicated Common Mistakes section with problem/fix pairs (Fighting the harness, Skipping detection, Skipping ignore verification, Assuming directory location, Proceeding with failing tests)
+**sp-compound approach:** Red Flags only; SP's items folded into Never/Always bullets
+**Rejection reason:** Dual sections restate the same content twice. Folding captures the behavior without duplication. Principle #1
+**Re-evaluate if:** Red Flags loses Never/Always structure
+
+### [2026-05-08] work: AGENTS.md adopted as canonical project-conventions doc
+
+**Source:** CE (ce-work)
+**What upstream has:** Reads AGENTS.md as canonical per-project conventions document in Phase 1 context gathering
+**sp-compound approach:** Reads CLAUDE.md + AGENTS.md where present; neither treated as canonical
+**Rejection reason:** Canonicalizing AGENTS.md cross-skill would cascade across brainstorm/plan/review and lock sp-compound to a CE convention. Principles #1, #6
+**Re-evaluate if:** AGENTS.md becomes an industry-standard convention across SP + CE
+
+### [2026-05-08] work: Sensitive-surface enumeration in Large-triage routing
+
+**Source:** CE (ce-work)
+**What upstream has:** Large-change triage enumerates sensitive surfaces (auth, payments, migrations, public APIs) that re-trigger tiered review routing
+**sp-compound approach:** sp-compound:review owns review-depth decisions internally; work dispatches uniformly
+**Rejection reason:** Reintroduces Tier routing through a side door. Already-rejected Tier 1/Tier 2 routing (2026-04-12, 2026-04-22) applies. Principle #1
+**Re-evaluate if:** sp-compound:review loses internal depth routing
+
+### [2026-05-08] work: Shipping flow extracted to separate references/ file
+
+**Source:** CE (ce-work)
+**What upstream has:** Shipping workflow moved to `references/shipping.md`
+**sp-compound approach:** Phases 3-4 (~15 lines) inline in SKILL.md
+**Rejection reason:** Extraction adds failure mode (missing-reference, load error) without savings at 15 lines. Principle #1
+**Re-evaluate if:** Shipping section grows substantially
+
+### [2026-05-08] git-commit-push-pr: PR mode dispatch on pasted URL/number
+
+**Source:** CE (ce-commit-push-pr)
+**What upstream has:** Arbitrary pasted PR ref (URL or #N) triggers description-update mode on that PR
+**sp-compound approach:** Description-update mode detects current branch's PR via `gh pr view`
+**Rejection reason:** Niche; doubles conditional surface in Step 5 for a rare workflow. Principle #1
+**Re-evaluate if:** Users routinely update PRs other than their current branch's
+
+### [2026-05-08] git-commit-push-pr: Visual-aids 6-row PR-shape table
+
+**Source:** CE (ce-commit-push-pr)
+**What upstream has:** Table mapping 6 change shapes (state/ERD/flow/measurements/trade-offs/etc.) to mermaid vs table choice
+**sp-compound approach:** Concise "3+ interacting components" trigger
+**Rejection reason:** Same topology-vs-rows content already rejected 2026-04-22. Principle #1
+**Re-evaluate if:** Agents repeatedly pick the wrong visual aid
+
+### [2026-05-08] git-commit-push-pr: Pre-composition user focus hint parameter
+
+**Source:** CE (ce-commit-push-pr)
+**What upstream has:** Optional pre-composition parameter letting user pre-steer the description focus before first draft
+**sp-compound approach:** Post-preview steering — user refines after seeing the first draft
+**Rejection reason:** Post-preview path covers the realistic workflow (user sees draft, asks for changes) without a new input parameter. Principle #1
+**Re-evaluate if:** Users repeatedly regenerate from scratch instead of refining
+
+### [2026-05-08] git-commit-push-pr: GHES `refs/pull/<n>/head` fetch fallback
+
+**Source:** CE (ce-commit-push-pr)
+**What upstream has:** GitHub Enterprise Server `refs/pull/<n>/head` fetch fallback for cross-repo PRs
+**sp-compound approach:** Fork-remote handling in base resolution only
+**Rejection reason:** Tied to the already-rejected cross-repo PR API fallback (2026-04-22); same edge-case category. Principle #1
+**Re-evaluate if:** GHES + cross-repo fork PR workflows become common in sp-compound user base

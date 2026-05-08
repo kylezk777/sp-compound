@@ -65,6 +65,22 @@ Every reviewer agent produces findings in this JSON format.
 | **manual** | downstream-resolver or human | Actionable but requires design judgment. Examples: redesign data model, add pagination strategy. |
 | **advisory** | human or release | Report-only. No action expected. Examples: design asymmetry, residual risk, deployment notes. |
 
+### safe_auto decisive test
+
+Classify a finding as `safe_auto` when **both** hold:
+
+- The fix is one sentence with no "depends on" clauses
+- AND no change to function signature, public API / response contract, error contract, security posture, or permission model
+
+Boundary cases that qualify:
+
+- Internal nil/None guard that does not alter the error contract
+- Verifiable off-by-one that mirrors a parallel pattern elsewhere in the diff or file
+- In-scope dead code removal (not exported, no callers)
+- Mechanical helper extraction where naming and placement follow from the shared shape
+
+Anything failing either clause escalates to `gated_auto` or `manual`.
+
 ## Owner Routing
 
 | Owner | Meaning |
@@ -77,7 +93,7 @@ Every reviewer agent produces findings in this JSON format.
 ## Confidence Scale
 
 - **0.85-1.00:** Certain -- verifiable from code alone
-- **0.70-0.84:** High confidence -- real and important
+- **0.70-0.84:** High confidence -- real and important. Behavioral test: the reviewer can name a concrete observable consequence -- wrong result, unhandled error path, contract mismatch, security exposure, or missing coverage a real test would surface. Style opinions about code quality do not meet this bar; they belong at 0.60-0.69.
 - **0.60-0.69:** Moderate -- include only when clearly actionable
 - **< 0.60:** Suppressed by merge pipeline (except P0 at 0.50+)
 - **< 0.30:** Do not report -- likely false positive
@@ -90,6 +106,9 @@ Actively suppress:
 - Code that looks wrong but is intentional (check comments, PR description)
 - Issues already handled elsewhere (callers, guards, middleware)
 - Generic "consider adding" advice without a concrete failure mode
+- Findings that override an existing explicit suppression (`eslint-disable-next-line`, `rubocop:disable`, `# noqa:`) -- the author already opted out
+- "General code-quality" concerns not tied to a codified project standard (too long / too many params / hard to read) -- style opinions without a rule
+- Speculative future-work ("might break under load") -- hypothetical, not observable
 
 ## Post-Triage Fields
 

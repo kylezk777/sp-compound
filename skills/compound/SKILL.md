@@ -158,6 +158,8 @@ Collect all Phase 1 results. Check overlap score:
 
 Write the document to `.sp-compound/solutions/<category>/YYYY-MM-DD-<slug>.md` using the template from `references/resolution-template.md`.
 
+After writing, locate the validator with `git rev-parse --show-toplevel` + `/skills/compound/scripts/validate-frontmatter.py` (CWD-independent; works from worktrees and subdirectories). Run `python3 <validator-path> <output-path>` to catch silent-corruption parser-safety issues the prose rules miss: malformed `---` delimiters, unquoted ` #` (silent comment truncation), and unquoted `: ` (silent mapping confusion) in top-level scalar values. Exit 0 means the doc is parser-safe; exit 1 means stderr names the offending field(s) and what to fix — quote the value(s), re-write the doc, and re-run until exit 0. Do not declare success while validation fails. Pure-stdlib Python 3; no third-party deps. If Python 3 is not available OR the validator file is missing (FileNotFoundError), skip and note the skip explicitly in the output (distinguish "skipped" from "passed").
+
 ### Creating .sp-compound/solutions/ Directory
 
 If `.sp-compound/solutions/` doesn't exist yet:
@@ -244,3 +246,4 @@ After displaying the output, present the "What's next?" options using the platfo
 - `references/yaml-schema.md` — category-to-directory mapping
 - `references/resolution-template.md` — document section templates
 - `references/discoverability-check.md` — instruction file verification
+- `scripts/validate-frontmatter.py` — parser-safety validator (run after writing docs)

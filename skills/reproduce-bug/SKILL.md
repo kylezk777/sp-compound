@@ -23,7 +23,9 @@ If no issue number/URL provided, ask the user for one (using the platform's ques
 
 **Prior-attempt awareness:** If the user indicates prior failed attempts ("I've been trying", "keeps failing", "stuck"), ask what they have already tried before investigating.
 
-Extract from the issue:
+**Read the full thread, not just the opening post.** Comments — especially the latest ones — frequently contain updated reproduction steps, narrowed scope, prior failed attempts, additional stack traces, or a pivot to a different suspected cause. Treating the opening description as the whole picture often sends the investigation in the wrong direction.
+
+Extract from the combined thread (original description + every comment):
 - **Reported symptoms** — error messages, wrong output, crashes
 - **Expected behavior** — what should happen
 - **Reproduction steps** — steps the reporter provided (if any)
@@ -80,6 +82,10 @@ For bugs needing specific data, user roles, or external service state:
 2. Ask user whether they can set up the conditions
 3. Guide through manual reproduction if needed
 
+### If reproduction is large, minimize it
+
+Once a bug reproduces reliably but the reproduction is large (long test, big payload, multi-step flow), shrink it before Phase 4. A smaller repro localizes the trigger and makes every subsequent step faster. Cut the reproduction roughly in half, confirm it still fails, recurse on the failing half. Stop when further reduction loses the failure. Common wins: remove unrelated setup, strip input fields, shrink string values to the minimum that still triggers.
+
 ### If reproduction fails
 
 1. Try remaining hypotheses
@@ -130,6 +136,7 @@ Compile findings:
 4. **Suggested fix** — if apparent, describe specific code changes
 5. **Tests to prevent recurrence** — beyond the reproduction test, which specific test files/assertions should be added; whether existing tests should have caught this and why they did not
 6. **Open questions** — anything unclear
+7. **Confidence** — High / Medium / Low in the root cause identification (single word; lets the user and downstream skills decide whether to fix directly or keep investigating)
 
 Present to user. Do NOT post to GitHub without explicit consent.
 

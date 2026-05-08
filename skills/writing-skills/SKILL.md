@@ -49,8 +49,10 @@ description: "Use when [specific triggering conditions and symptoms]"
 
 **Frontmatter rules:** (see [agentskills.io/specification](https://agentskills.io/specification) for all supported fields)
 - Max 1024 characters total for frontmatter
-- `name`: letters, numbers, hyphens only
+- `name`: letters, numbers, hyphens only. Prefer active voice / verb-first / gerunds (`condition-based-waiting`, `creating-skills`) over noun phrases (`async-test-helpers`, `skill-creation`). Name by what you DO or core insight.
 - `description`: starts with "Use when...", describes TRIGGERING CONDITIONS only. Never summarize the skill's workflow — agents may follow the description instead of reading the full skill. Keep under 500 characters.
+- `description` voice: third person, never first person (description is injected into the system prompt).
+- `description` content: describe the problem (race conditions, flakiness), not language-specific symptoms (setTimeout, sleep) — unless the skill itself is technology-specific.
 
 **Body structure:**
 1. Overview — core principle in 1-2 sentences
@@ -70,7 +72,10 @@ The description decides whether the skill gets loaded. Make it answer: "Should I
 # BAD: Summarizes workflow — agent may shortcut and skip the skill body
 description: "Review code between tasks with spec compliance then quality check"
 
-# GOOD: Just triggering conditions
+# BAD: First person — description is injected into system prompt
+description: "I can help you with async tests when they are flaky"
+
+# GOOD: Just triggering conditions, third person, problem-level
 description: "Use when executing implementation plans with independent tasks"
 ```
 
@@ -84,6 +89,14 @@ Use words agents search for: error messages, symptoms, synonyms, tool names.
 - Move heavy reference (100+ lines) to separate files
 - Use cross-references instead of repeating content
 - One excellent example beats many mediocre ones
+
+### Cross-Referencing Other Skills
+
+Reference by skill name with an explicit requirement marker. Never use `@path/to/SKILL.md` — `@` syntax force-loads the file immediately and burns context before it is needed.
+
+- GOOD: `**REQUIRED SUB-SKILL:** sp-compound:flexible-tdd`
+- BAD: `@skills/flexible-tdd/SKILL.md` (force-loads, burns context)
+- BAD: `See skills/flexible-tdd` (unclear if required)
 
 ## File Organization
 
@@ -190,6 +203,7 @@ Make it easy for agents to self-check:
 | "I'll test if problems emerge" | Problems = agents can't use skill. Test BEFORE deploying. |
 | "Too tedious to test" | Testing is less tedious than debugging bad skill in production. |
 | "I'm confident it's good" | Overconfidence guarantees issues. Test anyway. |
+| "Academic review is enough" | Reading is not using. Test application scenarios. |
 | "No time to test" | Deploying untested skill wastes more time fixing it later. |
 
 **All of these mean: Test before deploying. No exceptions.**
@@ -200,7 +214,14 @@ Make it easy for agents to self-check:
 NO SKILL WITHOUT A FAILING TEST FIRST
 ```
 
-Applies to NEW skills AND EDITS. Write skill before testing? Delete it. Start over. No exceptions.
+Applies to NEW skills AND EDITS. Write skill before testing? Delete it. Start over. Edit skill without testing? Same violation.
+
+**No exceptions:**
+- Not for "simple additions"
+- Not for "just adding a section"
+- Not for "documentation updates"
+- Don't keep untested changes as "reference"
+- Delete means delete
 
 ## Checklist
 

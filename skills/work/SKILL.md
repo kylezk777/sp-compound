@@ -13,6 +13,10 @@ Execute plans efficiently using the best strategy for the task. For plans with 3
 
 **Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration.
 
+**Continuous execution:** Do not pause to check in between tasks. Execute all tasks without stopping. The only reasons to stop are: BLOCKED status you cannot resolve, ambiguity that genuinely prevents progress, or all tasks complete. "Should I continue?" prompts waste user turns — they asked you to execute the plan, so execute it.
+
+**Do not edit the plan body during execution.** The plan is a decision artifact; progress lives in git commits and the task list. The only plan mutation is the final `status` flip at Phase 4. Legacy plans may contain `- [ ]` / `- [x]` marks on unit headings — ignore them as state; per-unit completion is determined by reading current code.
+
 ## Phase 0: Input Triage
 
 Determine routing based on input:
@@ -77,11 +81,23 @@ This ensures serial execution respects batch order, and parallel execution only 
 2. Any file appearing in 2+ units → downgrade to serial subagent (git index contention / last-writer-wins)
 3. Log the downgrade reason (e.g., "Units 2 and 4 share `routes.rb` — using serial")
 
-**Parallel subagent constraints** — when dispatching in parallel (not serial/inline):
-- Instruct each subagent: "Do not `git add`, do not commit, do not run the full test suite. The orchestrator handles staging, commits, and suite runs after the batch completes."
-- These constraints prevent git index corruption and test interference across concurrent subagents.
+**Parallel isolation mode** — prefer worktree isolation when the harness exposes it:
 
-**After a parallel batch completes:**
+| Mode | When | Subagent rules |
+|------|------|----------------|
+| **Worktree-isolated** | Harness supports per-subagent worktrees (e.g., Claude Code `Agent` tool with `isolation:"worktree"`) | Subagent stages, commits, and runs its unit's tests inside its own worktree branch |
+| **Shared-directory fallback** | Harness shares orchestrator cwd | Instruct each subagent: "Do not `git add`, do not commit, do not run the full test suite. The orchestrator handles staging, commits, and suite runs after the batch." |
+
+Worktree isolation eliminates git index contention and test interference, and surfaces file overlaps as loud merge conflicts instead of silent last-writer-wins loss.
+
+**After a worktree-isolated batch completes:**
+1. Wait for every subagent in the batch
+2. For each completed subagent in dependency order: merge its branch into the orchestrator's branch. If a merge conflict surfaces, `git merge --abort` and re-dispatch the conflicting unit serially against the now-merged tree — hand-resolving silently discards one unit's intent
+3. After each merge, run the relevant test suite. Fix before merging the next branch
+4. Run the two-stage review (2.3/2.4) for each merged unit
+5. Clean up worktrees/branches via `sp-compound:git-worktree` conventions
+
+**After a shared-directory batch completes:**
 1. Wait for every subagent in the batch before acting on any result
 2. Cross-check actual files each subagent modified (not just declared `Files:`) — a collision means 2+ subagents wrote the same file, and only the last writer survives. On collision: commit all non-colliding files first, then re-run affected units serially for the shared file
 3. For each unit in dependency order: review diff, run relevant tests, stage only that unit's files, commit
@@ -90,6 +106,10 @@ This ensures serial execution respects batch order, and parallel execution only 
 ## Phase 2: Execute — Serial Subagent (Primary Path)
 
 For each task in priority order:
+
+### 2.0 Idempotency Check
+
+Before dispatching: if the unit's `Verification` criteria are already satisfied by current code (files exist with the expected capability, tests pass as specified), the work has likely shipped on a prior branch or session. Verify the match, mark the task complete, and move on. Do not silently reimplement.
 
 ### 2.1 Dispatch Implementer
 

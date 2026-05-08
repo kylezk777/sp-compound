@@ -36,11 +36,12 @@ You MUST create a task for each of these items and complete them in order:
 5. **Offer Visual Companion** — if topic involves visual questions (its own message, not combined)
 6. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
 7. **Propose 2-3 approaches** — with trade-offs; present all then recommend
-8. **Present requirements** — grouped by theme, get user approval
-9. **Write requirements doc** — save to `.sp-compound/brainstorms/YYYY-MM-DD-<topic>-requirements.md`
-10. **Requirements self-review** — check for placeholders, contradictions, ambiguity, scope
-11. **User reviews written requirements** — ask user to review before proceeding
-12. **Transition to planning** — resolve blocking questions, then invoke sp-compound:plan skill
+8. **Scope checkpoint** — single-turn Stated/Inferred/Out synthesis; user confirms before doc write
+9. **Present requirements** — grouped by theme, get user approval
+10. **Write requirements doc** — save to `.sp-compound/brainstorms/YYYY-MM-DD-<topic>-requirements.md`
+11. **Requirements self-review** — check for placeholders, contradictions, ambiguity, scope
+12. **User reviews written requirements** — ask user to review before proceeding
+13. **Transition to planning** — resolve blocking questions, then invoke sp-compound:plan skill
 
 ## Phase 0: Resume Detection
 
@@ -190,6 +191,19 @@ A question about a UI topic is not automatically a visual question. "What does p
 - Present all approaches first, then state your recommendation -- leading with a recommendation before the user sees alternatives anchors the conversation prematurely
 - Present conversationally, not as a formal comparison matrix
 - At Deep-product tier, alternatives should differ on **what** is built (product shape, actors, positioning), not just **how**
+- **Approach granularity:** describe at mechanism / product-shape level, not architecture. No file paths, column names, method names, or schema shapes -- those are planning's job. Bringing architecture forward here forces the user to make architectural decisions on intentionally-shallow brainstorm research.
+
+## Phase 3.5: Scope Checkpoint
+
+Before writing the requirements doc, surface a single-turn scope synthesis so the user can correct framing before the artifact lands. Fires for all tiers except the non-software route. Skip only when the opening prompt was already a complete scope statement the user does not need to re-confirm (e.g., "fix the typo on line 47").
+
+Present three labeled buckets in chat, with a 1-3 line forward-looking prose gloss above them:
+
+- **Stated** -- what the user said directly (original prompt, dialogue answers, chosen approach).
+- **Inferred** -- gaps the agent filled with assumptions. These are the actionable bets the user can correct.
+- **Out of scope** -- deliberately excluded items.
+
+Then ask the user to confirm, correct, or redirect. If they revise, integrate changes and re-present before writing. Only proceed to Phase 4 on explicit confirmation. Keep the checkpoint scope-only -- no file paths, schemas, or code shapes (those are planning's job). Lightweight gets one short paragraph plus brief bullets; Standard/Deep gets explicit per-bucket lists.
 
 ## Phase 4: Present Requirements
 

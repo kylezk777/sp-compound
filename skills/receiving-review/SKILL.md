@@ -139,6 +139,8 @@ No "Thanks for catching that!" or any gratitude expression. Actions speak. Just 
 
 **Fix everything valid** -- including nitpicks and low-priority items. If already in the code, fix it rather than punt it.
 
+**Narrow exception — decline when implementing would actively harm the code.** Signals: violates a project rule in CLAUDE.md/AGENTS.md, adds dead defensive code, suppresses errors that should propagate, premature abstraction, or restates code in comments. Use the `declined` verdict and cite the specific harm. **When in doubt, fix it.**
+
 ## Gracefully Correcting Your Pushback
 
 If you pushed back and were wrong:
@@ -190,6 +192,7 @@ When replying to feedback, quote the relevant part of the original comment for c
 - `fixed-differently` — code change made with a better approach; explain why it diverges
 - `replied` — no change needed; answered question or explained decision
 - `not-addressing` — feedback is factually wrong; skip with evidence
+- `declined` — observation may be valid, but implementing it would harm the code; cite the specific harm
 - `needs-human` — cannot determine right action; leave thread open for user input
 
 ```
@@ -210,6 +213,13 @@ For items not addressed:
 > [quoted relevant part of original feedback]
 
 Not addressing: [reason with evidence]
+```
+
+For declined items:
+```
+> [quoted relevant part of original feedback]
+
+Declined: [specific harm cited, e.g., "this would add a defensive null check the type system already guarantees" or "violates the no-premature-abstraction rule in CLAUDE.md"]
 ```
 
 ## GitHub Thread Replies

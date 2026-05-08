@@ -121,6 +121,7 @@ This fails because: no pipe-delimited tables, no severity-grouped `###` headers,
 - **Horizontal rule** (`---`) separates findings from verdict
 - **`###` headers** for each section -- never plain text headers
 - **Overflow warning:** When the run's `triage_overflow_warning` flag is true (triage dropped >50% of findings), prepend a single warning line BEFORE the `### P0 -- Critical` header (or the first severity header present). Format exactly: `⚠  Triage dropped >50% of findings in this run. Inspect triage.json before trusting the verdict.` The warning appears in all modes.
+- **Pipe escaping:** When a finding title or column value contains a literal `|`, escape it as `\|` (or rewrite with `or`) so table columns stay aligned. This rule applies ONLY to finding rows — not to code blocks, not to enum-listing tables elsewhere in the schema/template. Example — a title like ``cache key uses `user|group` delimiter`` becomes `` `user\|group` `` in the Issue column, OR is rephrased to ``cache key uses `user` or `group` delimiter`` to avoid the escape entirely.
 
 ## Headless Mode Format
 

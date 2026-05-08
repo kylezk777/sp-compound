@@ -10,7 +10,8 @@ Go from working tree changes to an open pull request in a single workflow. PR de
 ## Mode Detection
 
 - **Full workflow** (default): commit -> push -> create/update PR
-- **Description-only update**: user says "update the PR description" / "refresh the PR" -> skip to Description Update section
+- **Description-only**: user says "write/draft a PR description", "describe this PR". Run Step 5 body composition only; print the result. Apply only if the user asks.
+- **Description update**: user says "update the PR description" / "refresh the PR" -> skip to Description Update section. If the PR's state from `gh pr view` is not `OPEN`, report and stop.
 
 ## Step 1: Gather Context
 
@@ -50,9 +51,16 @@ Priority order for commit messages and PR titles:
 2. Recent commit history patterns
 3. Fallback: conventional commits (`type(scope): description`)
 
+With conventional commits:
+- When ambiguous, default to `fix:` over `feat:`. Adding code to remedy broken or missing behavior is `fix:`; reserve `feat:` for capabilities the user could not previously accomplish.
+- Never use `!` or `BREAKING CHANGE:` without explicit user confirmation — they trigger automated major-version bumps.
+
 ## Step 3: Stage and Commit
 
-1. If on default branch, create a descriptive feature branch first
+1. If on default branch, create a descriptive feature branch safely:
+   - `git fetch --no-tags origin <default>` to refresh the base. If fetch fails, branch from local HEAD and note in the summary that base freshness was not verified; skip the unpushed-commits check (the answer is unreliable without a fresh base).
+   - Check `git log origin/<default>..HEAD --oneline`. If non-empty, local default has unpushed commits (stale session, another worktree, or user-authored commits meant for a branch). Ask whether to carry them onto the new branch (`BASE_REF=HEAD`) or leave them on local default (`BASE_REF=origin/<default>`). Never default silently — carrying foreign commits into a PR is worse than asking again.
+   - `git checkout -b <branch-name> "$BASE_REF"`. If checkout fails because uncommitted changes would be overwritten, `git stash push -u -m "gcpr: pre-branch <branch>"`, retry checkout, then `git stash pop`. If pop reports conflicts, surface the conflict output and the stash ref to the user — do not auto-resolve.
 2. Scan changed files for naturally distinct concerns — split into separate commits when obvious (file-level only, no `git add -p`). Two or three logical commits at most.
 3. Stage specific files (never `git add -A`). Use heredoc for commit message:
    ```bash
@@ -132,7 +140,8 @@ If the user has documented style preferences (in CLAUDE.md, project instructions
 
 ### Writing Principles
 
-- **Lead with value**: first sentence = *why this PR exists*, not what files changed
+- **Lead with value**: first sentence = *why this PR exists*, not what files changed. Bad: "This PR introduces a new `foo` module and modifies `bar.ts`." Good: "Evidence capture now works for CLI tools and libraries, not just web apps."
+- **Do not enumerate the diff**: GitHub's Files Changed tab already lists changed files, functions, and line counts. The description explains what the diff does not show — what's now possible, what was broken and is now fixed, what shape changed.
 - **Describe the net result, not the journey**: no intermediate failures, debugging steps, iteration history
 - **When commits conflict, trust the final diff**
 - **Explain the non-obvious**: spend space on things the diff doesn't show
@@ -158,22 +167,28 @@ Re-read the composed body once and apply these cuts:
 
 ## Step 6: Create or Update PR
 
+### Applying via gh
+
+Write the body to a temp file and pass via `--body-file`. Do not inline the body with `--body "$(cat <<...)"`, `--body-file -`, or stdin pipes — wrappers and stdin handling can silently produce an empty PR body while `gh` still exits 0 and returns a URL.
+
+```bash
+BODY_FILE=$(mktemp "${TMPDIR:-/tmp}/gcpr-body.XXXXXX") && cat > "$BODY_FILE" <<'__GCPR_BODY_END__'
+<the composed body markdown goes here, verbatim>
+__GCPR_BODY_END__
+```
+
+The quoted sentinel keeps `$VAR`, backticks, and any literal `EOF` inside the body from being expanded. If `<TITLE>` contains `"`, `` ` ``, `$`, or `\`, escape them or switch to single quotes.
+
 ### New PR
 ```bash
-gh pr create --title "the pr title" --body "$(cat <<'EOF'
-PR description here
-EOF
-)"
+gh pr create --title "<TITLE>" --body-file "$BODY_FILE"
 ```
 
 ### Existing PR
 Report the PR URL, then ask whether to update the description. If yes, rewrite from scratch based on the full branch diff (not just new commits). Before applying, preview: "New title: `<title>` (`<N>` chars). Summary leads with: `<first two sentences>`. Total body: `<L>` lines. Apply?" — the first two sentences of the Summary carry most of the reviewer's attention. On decline, accept steering text and regenerate; do not apply.
 
 ```bash
-gh pr edit --body "$(cat <<'EOF'
-Updated description here
-EOF
-)"
+gh pr edit --title "<TITLE>" --body-file "$BODY_FILE"
 ```
 
 ## Description Update Workflow
@@ -185,7 +200,7 @@ For "update/refresh the PR description" requests:
 3. Read current description, gather full branch scope, classify commits
 4. Write new description following sizing + writing principles above
 5. Summarize changes from old -> new description, get user confirmation
-6. Apply with `gh pr edit --body`
+6. Apply via the `--body-file` pattern in Step 6 (`gh pr edit --body-file "$BODY_FILE"`)
 
 ## Integration
 

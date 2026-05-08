@@ -8,6 +8,8 @@ This content is loaded when Phase 6 begins -- after the requirements document is
 
 Use the platform's blocking question tool when available (`AskUserQuestion` in Claude Code, `request_user_input` in Codex, `ask_user` in Gemini). Otherwise present numbered options in chat and end the turn.
 
+**Path format:** Use absolute paths for chat-output file references (relative paths are not auto-linked as clickable in most terminals). Paths inside the written requirements doc stay repo-relative per the SKILL.md rule.
+
 If `Resolve Before Planning` contains any items:
 - Ask the blocking questions now, one at a time, by default
 - If the user explicitly wants to proceed anyway, first convert each remaining item into an explicit decision, assumption, or `Deferred to Planning` question

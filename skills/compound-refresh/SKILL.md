@@ -264,7 +264,8 @@ If a cluster has 3+ overlapping docs, process pairwise: consolidate the two most
    - Target path and category
    - Contents of the three reference files above (source of truth for frontmatter, categories, sections)
 3. The subagent writes the replacement using reference files as the contract. It should use native file search/read tools for additional context.
-4. After the subagent completes, the orchestrator deletes the old learning file. The new learning may include `superseded_by` for traceability.
+4. Locate the validator via `git rev-parse --show-toplevel` + `/skills/compound/scripts/validate-frontmatter.py` (CWD-independent). Run `python3 <validator-path> <new-learning-path>` to catch silent-corruption parser-safety issues (malformed `---` delimiters, unquoted ` #` or `: ` in top-level scalars). Exit 0 = parser-safe; exit 1 = stderr names offending fields — quote the value(s), re-write, and re-run until exit 0. Pure-stdlib Python 3. If Python 3 is unavailable OR the validator file is missing, skip and note the skip explicitly (distinguish skipped from passed).
+5. After validation passes, the orchestrator deletes the old learning file. The new learning may include `superseded_by` for traceability.
 
 **When evidence is insufficient** (drift too fundamental to document the current approach confidently):
 Mark old doc as stale in place: add `status: stale`, `stale_reason`, `stale_date` to frontmatter. Report what evidence was found, what is missing, and recommend running `sp-compound:compound` when the user next encounters that problem area.
@@ -276,7 +277,17 @@ Mark old doc as stale in place: add `status: stale`, `stale_reason`, `stale_date
 - Implementation gone + domain gone = Delete (e.g., feature fully removed)
 - Implementation gone + domain active = Replace (e.g., auth code moved, app still handles auth)
 
-**Auto-delete when:** referenced code is gone AND problem domain is gone, OR doc is fully superseded by a clearly better successor, OR doc is plainly redundant.
+**Before deleting, check for inbound links.** Other docs that cite this file may rely on it. Use native content search (Grep) for the filename slug across markdown files (other solutions docs, plans, READMEs, instruction files). Classify each hit:
+
+| Citation type | Meaning | Action |
+|---------------|---------|--------|
+| **Decorative** | "see also" pointer, bare attribution, principle stated inline at the citation site | Delete is fine; clean up the citation in the same commit |
+| **Substantive** | Citing doc relies on the cited doc for content not stated inline ("see X for details on Y" with no inline Y) | Signal Replace — write a successor at the same path, or Keep with narrowed scope |
+| **Mixed/unclear** | Ambiguous role | Stale-mark instead of delete |
+
+In autofix/autonomous modes, any substantive or unclear citation downgrades to stale-marking — writing a Replace successor is judgment-heavy and should not happen unattended.
+
+**Auto-delete when ALL of:** implementation gone AND problem domain gone (or doc fully superseded by a clearly better successor, or plainly redundant) AND inbound links absent or unambiguously decorative.
 
 Do not delete just because it is old. Do not keep a doc just because its general advice is "still sound" — if the specific code it references is gone, the learning misleads readers. Git history preserves the content.
 
